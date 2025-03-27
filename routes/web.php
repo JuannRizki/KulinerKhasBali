@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListBarangController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\HomeController;
+
+Route::get('/menu', [MenuController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +27,7 @@ Route::get('/', function () {
 
 // Route untuk menampilkan daftar barang
 Route::get('/list-barang', [ListBarangController::class, 'tampilkan']);
+Route::get('/produk', [ProdukController::class, 'index']);
+Route::get('/customer', [CustomerController::class, 'index']);
+Route::get('/menu', [MenuController::class, 'index']);Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search');
+Route::get('/', [HomeController::class, 'index'])->name('home');
