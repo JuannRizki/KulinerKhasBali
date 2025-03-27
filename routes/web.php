@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListBarangController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +23,5 @@ Route::get('/', function () {
 
 // Route untuk menampilkan daftar barang
 Route::get('/list-barang', [ListBarangController::class, 'tampilkan']);
+Route::get('/produk', [ProdukController::class, 'index']);
+Route::get('/customer', [CustomerController::class, 'index']);
