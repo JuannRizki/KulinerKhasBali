@@ -25,4 +25,11 @@ Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
 Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
 
 // Route untuk costumer (Pastikan ini memang diperlukan dan bukan duplikat dari customer)
+
 Route::get('/costumer', [CostumerController::class, 'index'])->name('costumer.index');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/kontak', [ContactController::class, 'showContactForm'])->name('contact.index');
+Route::post('/kontak', [ContactController::class, 'submitContact'])->name('contact.submit');
