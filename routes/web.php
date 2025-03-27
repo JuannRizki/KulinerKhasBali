@@ -16,6 +16,7 @@ Route::get('/list-barang', [ListBarangController::class, 'tampilkan'])->name('li
 
 // Route untuk menu
 Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search');
 
 // Route untuk produk
 Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
