@@ -2,22 +2,26 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListBarangController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group that
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CostumerController; // Pastikan nama ini benar
+use App\Http\Controllers\HomeController;
 
 // Route untuk halaman utama
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Route untuk menampilkan daftar barang
-Route::get('/list-barang', [ListBarangController::class, 'tampilkan']);
+Route::get('/list-barang', [ListBarangController::class, 'tampilkan'])->name('list.barang');
+
+// Route untuk menu
+Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+
+// Route untuk produk
+Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+
+// Route untuk customer
+Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+
+// Route untuk costumer (Pastikan ini memang diperlukan dan bukan duplikat dari customer)
+Route::get('/costumer', [CostumerController::class, 'index'])->name('costumer.index');
