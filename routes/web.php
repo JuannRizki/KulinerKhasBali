@@ -7,6 +7,14 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CostumerController; // Pastikan nama ini benar
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\LocationController;
+
+Route::get('/location', [LocationController::class, 'index']);
+
+
+Route::get('/about', [AboutController::class, 'index']);
+
 
 // Route untuk halaman utama
 Route::get('/', [HomeController::class, 'index'])->name('home');
