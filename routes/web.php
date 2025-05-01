@@ -1,61 +1,60 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ListBarangController;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\CostumerController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\AboutController;
-use App\Http\Controllers\LocationController;
-use App\Http\Controllers\LoginAdminController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ContactController;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KontakController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-
-
-
-// Route lokasi
-Route::get('/location', [LocationController::class, 'index']);
-
-// Route about
-Route::get('/about', [AboutController::class, 'index']);
-
-// Route halaman utama
+// Rute untuk halaman utama (tanpa login)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Route daftar barang
-Route::get('/list-barang', [ListBarangController::class, 'tampilkan'])->name('list.barang');
+// Rute login dan logout
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// Route menu
-Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search');
+// Group route untuk autentikasi dan profil pengguna
+Route::middleware('auth')->group(function () {
+    // Rute untuk halaman profil pengguna
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Rute untuk dashboard pengguna yang sudah terverifikasi
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('dashboard');
 
-// Route produk
-Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    // Rute untuk CRUD pesanan (menggunakan resource controller)
+    Route::resource('pesanan', PesananController::class);
 
-// Route customer
-Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    // Rute untuk pembayaran dan rating pada pesanan
+    Route::put('/pesanan/{id}/pembayaran', [PesananController::class, 'updatePembayaran'])->name('pesanan.pembayaran');
+    Route::put('/pesanan/{id}/rating', [PesananController::class, 'updateRating'])->name('pesanan.updateRating');
+    
+    // Rute untuk membatalkan pesanan
+    Route::delete('/pesanan/{id}/batal', [PesananController::class, 'batal'])->name('pesanan.batal');
+    
+    // Rute untuk menampilkan pesanan yang sudah dibayar
+    Route::get('/pembayaran', [PesananController::class, 'pembayaran'])->name('pembayaran.index');
 
-// Route costumer (jika memang diperlukan)
-Route::get('/costumer', [CostumerController::class, 'index'])->name('costumer.index');
+    // Rute untuk menampilkan detail struk pembayaran
+    Route::get('/pembayaran/{id}/detail', [PesananController::class, 'detailStruk'])->name('pembayaran.detail');
 
-// Route login & logout
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Rute untuk melihat pesan kontak di admin
+    Route::get('/admin/pesan-kontak', [KontakController::class, 'lihatPesan'])->name('admin.pesanKontak');
 
-// Route kontak
-Route::get('/kontak', [ContactController::class, 'showContactForm'])->name('contact.index');
-Route::post('/kontak', [ContactController::class, 'submitContact'])->name('contact.submit');
+    // Rute untuk menghapus pesan kontak di admin
+    Route::delete('/admin/pesan-kontak/{id}', [KontakController::class, 'hapusPesan'])->name('admin.hapusPesan');
+});
 
-// Route admin
-Route::get('/admin/login', [LoginAdminController::class, 'showLogin'])->name('admin.login');
-Route::post('/admin/login', [LoginAdminController::class, 'login']);
+// Rute untuk kontak (hanya untuk pengguna yang sudah login)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
+    Route::post('/kontak', [KontakController::class, 'store'])->name('kontak.store');
+});
 
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+// Auth route untuk menangani autentikasi
+require __DIR__.'/auth.php';

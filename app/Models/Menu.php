@@ -9,6 +9,14 @@ class Menu extends Model
 {
     use HasFactory;
 
+    protected $table = 'menus';
+
     protected $fillable = ['nama', 'deskripsi', 'harga', 'gambar'];
+
+    // Tambahkan relasi ke tabel 'pesanans'
+    public function pesanans()
+{
+    return $this->hasMany(Pesanan::class);
 }
 
+}
