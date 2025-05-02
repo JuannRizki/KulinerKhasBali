@@ -6,7 +6,6 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KontakController;
-<<<<<<< HEAD
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -26,20 +25,15 @@ Route::get('/redirect', function () {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // 🔐 Login dan logout
-=======
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 // Rute untuk halaman utama (tanpa login)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Rute login dan logout
->>>>>>> f1eb59171ad931d734f3ee2a2f0898af39f106b2
+
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
-<<<<<<< HEAD
 // 🔐 Group route untuk user yang login
 Route::middleware('auth')->group(function () {
     // 👤 Profil
@@ -68,7 +62,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Auth route default Laravel
-=======
+
 // Group route untuk autentikasi dan profil pengguna
 Route::middleware('auth')->group(function () {
     // Rute untuk halaman profil pengguna
@@ -109,5 +103,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Auth route untuk menangani autentikasi
->>>>>>> f1eb59171ad931d734f3ee2a2f0898af39f106b2
 require __DIR__.'/auth.php';
