@@ -1,74 +1,82 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fooder - Kuliner Khas Bali</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            width: 250px;
-            height: 100vh;
-            background-color: #28a745;
-            color: white;
-            position: fixed;
-            padding: 20px;
-        }
-        .content {
-            margin-left: 270px;
-            padding: 20px;
-        }
-        .card img {
-            height: 200px;
-            object-fit: cover;
-        }
-    </style>
-</head>
-<body>
+@extends('layouts.app')
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>FOODER</h2>
-        <ul class="nav flex-column">
-            <li class="nav-item"><a href="{{ route('home') }}" class="nav-link text-white">🏠 Home</a></li>
-            <li class="nav-item"><a href="#" class="nav-link text-white">📋 Pesanan</a></li>
-            <li class="nav-item"><a href="#" class="nav-link text-white">💳 Pembayaran</a></li>
-            <li class="nav-item"><a href="#" class="nav-link text-white">📞 Kontak</a></li>
-            <li class="nav-item"><a href="#" class="nav-link text-white">❤️ Favorite</a></li>
-        </ul>
+@section('content')
+  <!-- Slider Gambar (Flowbite Carousel) -->
+  <div id="carouselExample" class="relative w-full" data-carousel="static">
+    <!-- Carousel Wrapper -->
+    <div class="relative h-56 sm:h-72 xl:h-96 overflow-hidden rounded-lg">
+      <!-- Slide 1 -->
+      <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
+        <img src="{{ asset('images/bali1.jpg') }}" class="w-full h-full object-cover" alt="Bali 1">
+      </div>
+      <!-- Slide 2 -->
+      <div class="hidden duration-700 ease-in-out" data-carousel-item>
+        <img src="{{ asset('images/bali2.jpg') }}" class="w-full h-full object-cover" alt="Bali 2">
+      </div>
+      <!-- Slide 3 -->
+      <div class="hidden duration-700 ease-in-out" data-carousel-item>
+        <img src="{{ asset('images/bali3.jpg') }}" class="w-full h-full object-cover" alt="Bali 3">
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="content">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2>Menu yang tersedia</h2>
-            <form action="{{ route('home') }}" method="GET" class="d-flex">
-                <input type="text" name="search" class="form-control me-2" placeholder="Cari makanan..." value="{{ request('search') }}">
-                <button type="submit" class="btn btn-success">Search</button>
-            </form>
+    <!-- Navigasi -->
+    <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+      <span class="inline-flex items-center justify-center w-8 h-8 bg-white/30 group-hover:bg-white/50 rounded-full">
+        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </span>
+    </button>
+    <button type="button" class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+      <span class="inline-flex items-center justify-center w-8 h-8 bg-white/30 group-hover:bg-white/50 rounded-full">
+        <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <!-- Judul -->
+  <h2 class="text-2xl font-bold my-6 px-4">Menu yang tersedia</h2>
+
+  <!-- Daftar Menu -->
+  <div class="px-4 pb-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @foreach($menus as $menu)
+      <div class="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden">
+        <img src="{{ asset('images/' . $menu->gambar) }}" alt="{{ $menu->nama }}" class="w-full h-48 object-cover">
+        <div class="p-4 text-center">
+          <h5 class="text-lg font-semibold mb-2">{{ $menu->nama }}</h5>
+
+          @if($menu->average_rating > 0)
+            <p class="text-yellow-500 mb-2">⭐ {{ $menu->average_rating }} / 5</p>
+          @else
+          
+          @endif
+
+          <p class="text-gray-500 mb-2">{{ $menu->deskripsi }}</p>
+          <p class="text-green-600 font-bold mb-4">Rp.{{ number_format($menu->harga, 0, ',', '.') }}</p>
+
+          @auth
+            <a href="#" 
+               class="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm order-btn"
+               data-nama="{{ $menu->nama }}"
+               data-gambar="{{ asset('images/' . $menu->gambar) }}"
+               data-harga="{{ $menu->harga }}"
+               data-id="{{ $menu->id }}">
+               🛒 Order Now
+            </a>
+          @else
+            <a href="{{ route('login') }}" class="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm">
+              Login untuk Order
+            </a>
+          @endauth
         </div>
+      </div>
+    @endforeach
+  </div>
 
-        <div class="row mt-3">
-            @foreach($menus as $menu)
-                <div class="col-md-4">
-                    <div class="card mb-3">
-                        <!-- Pastikan gambar ditampilkan dengan benar -->
-                        <img src="{{ asset('images/' . $menu->gambar) }}" class="card-img-top" alt="{{ $menu->nama }}">
-
-                        <div class="card-body text-center">
-                            <h5 class="card-title">{{ $menu->nama }}</h5>
-                            <p class="card-text">{{ $menu->deskripsi }}</p>
-                            <p class="fw-bold">Rp.{{ number_format($menu->harga, 0, ',', '.') }}</p>
-                            <a href="#" class="btn btn-primary">Order Now</a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-</body>
-</html>
+  <!-- Script Flowbite -->
+  <script src="{{ asset('js/flowbite.min.js') }}"></script>
+@endsection

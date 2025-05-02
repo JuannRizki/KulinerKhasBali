@@ -1,61 +1,60 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ListBarangController;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\CostumerController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\AboutController;
-use App\Http\Controllers\LocationController;
-use App\Http\Controllers\LoginAdminController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ContactController;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KontakController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminDashboardController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
+Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard')->middleware('auth');
 
+// 🔁 Redirect otomatis setelah login berdasarkan role
+Route::get('/redirect', function () {
+    if (auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('dashboard');
+});
 
-
-// Route lokasi
-Route::get('/location', [LocationController::class, 'index']);
-
-// Route about
-Route::get('/about', [AboutController::class, 'index']);
-
-// Route halaman utama
+// 🏠 Halaman utama (tanpa login)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Route daftar barang
-Route::get('/list-barang', [ListBarangController::class, 'tampilkan'])->name('list.barang');
+// 🔐 Login dan logout
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// Route menu
-Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search');
+// 🔐 Group route untuk user yang login
+Route::middleware('auth')->group(function () {
+    // 👤 Profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-// Route produk
-Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    // 📊 Dashboard user
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('dashboard');
 
-// Route customer
-Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    // 🍽️ Pesanan
+    Route::resource('pesanan', PesananController::class);
+    Route::put('/pesanan/{id}/pembayaran', [PesananController::class, 'updatePembayaran'])->name('pesanan.pembayaran');
+    Route::put('/pesanan/{id}/rating', [PesananController::class, 'updateRating'])->name('pesanan.updateRating');
+    Route::delete('/pesanan/{id}/batal', [PesananController::class, 'batal'])->name('pesanan.batal');
+    Route::get('/pembayaran', [PesananController::class, 'pembayaran'])->name('pembayaran.index');
+    Route::get('/pembayaran/{id}/detail', [PesananController::class, 'detailStruk'])->name('pembayaran.detail');
 
-// Route costumer (jika memang diperlukan)
-Route::get('/costumer', [CostumerController::class, 'index'])->name('costumer.index');
+    // 📨 Pesan kontak (khusus admin)
+    Route::get('/admin/pesan-kontak', [KontakController::class, 'lihatPesan'])->name('admin.pesanKontak');
+    Route::delete('/admin/pesan-kontak/{id}', [KontakController::class, 'hapusPesan'])->name('admin.hapusPesan');
 
-// Route login & logout
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // 💬 Kontak user
+    Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
+    Route::post('/kontak', [KontakController::class, 'store'])->name('kontak.store');
+});
 
-// Route kontak
-Route::get('/kontak', [ContactController::class, 'showContactForm'])->name('contact.index');
-Route::post('/kontak', [ContactController::class, 'submitContact'])->name('contact.submit');
-
-// Route admin
-Route::get('/admin/login', [LoginAdminController::class, 'showLogin'])->name('admin.login');
-Route::post('/admin/login', [LoginAdminController::class, 'login']);
-
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+// Auth route default Laravel
+require __DIR__.'/auth.php';
