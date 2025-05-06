@@ -49,6 +49,7 @@
 
     <!-- Modal -->
     <x-order-modal />
+    <x-footer />
   </div>
 
   <script>

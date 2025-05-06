@@ -1,9 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-  <div class="container mx-auto mt-10">
-    <a href="{{ route('dashboard') }}" class="btn btn-secondary mb-4">← Kembali ke Dashboard</a>
-    <h2 class="text-3xl font-bold mb-6">Daftar Pesanan Anda</h2>
+<div class="container mx-auto mt-10">
+  <a href="{{ route('dashboard') }}" class="btn btn-secondary mb-4">← Back to Home</a>
+  <h2 class="text-3xl font-bold mb-6">Your Order List</h2>
+</div>
+
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       @foreach($pesanans as $pesanan)
@@ -57,8 +59,8 @@
                 <select name="pembayaran" class="w-full p-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500" required>
                   <option value="" disabled selected>Pilih metode pembayaran</option>
                   <option value="COD">COD (Bayar di tempat)</option>
-                  <option value="Transfer Bank">Transfer Bank</option>
-                  <option value="QRIS">QRIS</option>
+                
+                 
                 </select>
                 <button type="submit" class="mt-3 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Simpan Pembayaran</button>
               </form>

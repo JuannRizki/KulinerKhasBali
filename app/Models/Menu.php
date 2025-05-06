@@ -13,10 +13,9 @@ class Menu extends Model
 
     protected $fillable = ['nama', 'deskripsi', 'harga', 'gambar'];
 
-    // Tambahkan relasi ke tabel 'pesanans'
+    // Relasi ke tabel 'pesanans'
     public function pesanans()
-{
-    return $this->hasMany(Pesanan::class);
-}
-
+    {
+        return $this->hasMany(Pesanan::class);
+    }
 }

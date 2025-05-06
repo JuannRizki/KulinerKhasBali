@@ -7,11 +7,11 @@ use Illuminate\Http\Request;
 
 class PesananController extends Controller
 {
-    // Menampilkan daftar pesanan
+    // Menampilkan daftar pesanan pengguna
     public function index()
     {
-        $pesanans = Pesanan::where('user_id', auth()->id())->get(); // Mengambil semua pesanan berdasarkan user_id
-        return view('user.pesanan.index', compact('pesanans')); // Mengarahkan ke view yang berada di folder user/pesanan
+        $pesanans = Pesanan::where('user_id', auth()->id())->get();
+        return view('user.pesanan.index', compact('pesanans'));
     }
 
     // Menyimpan pesanan baru
@@ -20,58 +20,57 @@ class PesananController extends Controller
         $request->validate([
             'menu_id' => 'required|exists:menus,id',
             'total_harga' => 'required|numeric',
+            'alamat' => 'required|string|max:255',
         ]);
 
         Pesanan::create([
-            'menu_id' => $request->menu_id,
+            'menu_id'     => $request->menu_id,
             'total_harga' => $request->total_harga,
-            'user_id' => auth()->id(), // Menggunakan auth()->id() untuk mengambil user yang sedang login
-            'status' => 'pending', // Status default "pending"
+            'alamat'      => $request->alamat,
+            'user_id'     => auth()->id(),
+            'status'      => 'pending', // Status pesanan baru
         ]);
 
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat!');
     }
 
-    // Menambahkan rating ke pesanan
+    // Memberikan rating pada pesanan
     public function updateRating(Request $request, $id)
     {
         $request->validate([
-            'rating' => 'required|integer|min:1|max:5', // Rating antara 1 sampai 5
+            'rating' => 'required|integer|min:1|max:5',
         ]);
 
-        $pesanan = Pesanan::findOrFail($id); // Menemukan pesanan berdasarkan ID
+        $pesanan = Pesanan::findOrFail($id);
 
-        // Cek apakah pesanan sudah dibayar
         if ($pesanan->status !== 'paid') {
-            return redirect()->route('pesanan.index')->with('error', 'Anda harus membayar terlebih dahulu sebelum memberikan rating.');
+            return redirect()->route('pesanan.index')->with('error', 'Bayar dulu sebelum beri rating.');
         }
 
-        // Jika sudah dibayar, simpan rating
-        $pesanan->rating = $request->rating;  // Mengupdate rating
-        $pesanan->save(); // Menyimpan perubahan
+        $pesanan->rating = $request->rating;
+        $pesanan->save();
 
         return redirect()->route('pesanan.index')->with('success', 'Rating berhasil ditambahkan!');
     }
 
-    // Menyimpan metode pembayaran ke pesanan
+    // Memilih metode pembayaran dan mengubah status ke paid
     public function updatePembayaran(Request $request, $id)
     {
         $request->validate([
-            'pembayaran' => 'required|in:COD,Transfer Bank,QRIS', // Validasi metode pembayaran
+            'pembayaran' => 'required|in:COD,Transfer Bank,QRIS',
         ]);
 
-        $pesanan = Pesanan::findOrFail($id); // Menemukan pesanan berdasarkan ID
+        $pesanan = Pesanan::findOrFail($id);
 
-        // Mengecek apakah status pesanan sudah dibayar atau belum
         if ($pesanan->status === 'paid') {
             return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar!');
         }
 
-        $pesanan->pembayaran = $request->pembayaran; // Menyimpan pilihan metode pembayaran
-        $pesanan->status = 'paid'; // Mengupdate status menjadi 'paid'
-        $pesanan->save(); // Menyimpan perubahan
+        $pesanan->pembayaran = $request->pembayaran;
+        $pesanan->status = 'paid';
+        $pesanan->save();
 
-        return redirect()->route('pesanan.index')->with('success', 'Metode pembayaran berhasil disimpan!');
+        return redirect()->route('pesanan.index')->with('success', 'Pembayaran berhasil!');
     }
 
     // Membatalkan pesanan
@@ -79,12 +78,11 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::findOrFail($id);
 
-        // Pastikan hanya pemilik pesanan yang bisa membatalkan
         if ($pesanan->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $pesanan->delete(); // Menghapus pesanan dari database
+        $pesanan->delete();
 
         return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
@@ -93,22 +91,21 @@ class PesananController extends Controller
     public function pembayaran()
     {
         $pesanans = Pesanan::where('user_id', auth()->id())
-                           ->where('status', 'paid') // Mengambil pesanan yang sudah dibayar
+                           ->where('status', 'paid')
                            ->get();
 
-        return view('user.pembayaran.index', compact('pesanans')); // Mengarahkan ke view di folder user/pembayaran
+        return view('user.pembayaran.index', compact('pesanans'));
     }
 
-    // Menampilkan detail struk pembayaran
+    // Menampilkan detail struk dari pesanan yang sudah dibayar
     public function detailStruk($id)
     {
-        $pesanan = Pesanan::findOrFail($id); // Mencari pesanan berdasarkan ID
+        $pesanan = Pesanan::findOrFail($id);
 
-        // Pastikan pesanan yang ditampilkan adalah yang sudah dibayar
         if ($pesanan->status !== 'paid') {
             return redirect()->route('pembayaran.index')->with('error', 'Pesanan belum dibayar.');
         }
 
-        return view('user.pembayaran.detail', compact('pesanan')); // Mengarahkan ke detail pembayaran di folder user/pembayaran
+        return view('user.pembayaran.detail', compact('pesanan'));
     }
 }

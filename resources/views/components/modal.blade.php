@@ -74,5 +74,17 @@ $maxWidth = [
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
     >
         {{ $slot }}
+        <!-- Modal untuk Ubah Pesanan -->
+<div x-show="open" x-cloak class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg w-1/3">
+        <h3 class="text-lg font-semibold mb-4">{{ $title }}</h3>
+        <p>{{ $message }}</p>
+        <div class="mt-4 flex justify-end space-x-4">
+            <button @click="open = false" class="bg-gray-300 px-4 py-2 rounded-md">Batal</button>
+            <button @click="open = false" class="bg-yellow-500 text-white px-4 py-2 rounded-md">{{ $buttonText }}</button>
+        </div>
+    </div>
+</div>
+
     </div>
 </div>

@@ -3,24 +3,25 @@
   <div class="container mx-auto flex items-center justify-between px-4 py-3">
     <!-- Logo -->
     <a href="#" class="text-white text-xl font-semibold flex items-center gap-2">
-      🍽️ Kuliner khas Bali
+      🍽️ Authentic Balinese Cuisine
     </a>
     <!-- Menu Navigasi -->
     <div class="hidden md:flex items-center gap-6">
-      <a href="{{ route('dashboard') }}" class="text-white hover:text-green-200">Dashboard</a>
-      <a href="{{ route('pesanan.index') }}" class="text-white hover:text-green-200">Pesanan</a>
-      <a href="{{ route('pembayaran.index') }}" class="text-white hover:text-green-200">Pembayaran</a>
-      <a href="{{ route('kontak') }}" class="text-white hover:text-green-200">Kontak</a>
+  <a href="{{ route('dashboard') }}" class="text-white hover:text-green-200">Home</a>
+  <a href="{{ route('menu.terbaik') }}" class="text-white hover:text-green-200">Menu</a>
+  <a href="{{ route('pesanan.index') }}" class="text-white hover:text-green-200">Orders</a>
+  <a href="{{ route('kontak') }}" class="text-white hover:text-green-200">Contact</a>
+  <a href="{{ route('pembayaran.index') }}" class="text-white hover:text-green-200">History</a>
+</div>
 
-      <a href="#" class="text-white hover:text-green-200">Favorite</a>
-    </div>
     <!-- Search + User Dropdown -->
     <div class="flex items-center gap-4">
       <!-- Form Search -->
       <form action="{{ route('dashboard') }}" method="GET" class="hidden md:flex items-center gap-2">
-        <input type="text" name="search" placeholder="Cari makanan..." value="{{ request('search') }}" class="rounded-full px-4 py-2 text-sm focus:outline-none">
-        <button type="submit" class="bg-white text-green-600 rounded-full px-4 py-2 font-semibold text-sm">Search</button>
-      </form>
+  <input type="text" name="search" placeholder="Search food..." value="{{ request('search') }}" class="rounded-full px-4 py-2 text-sm focus:outline-none">
+  <button type="submit" class="bg-white text-green-600 rounded-full px-4 py-2 font-semibold text-sm">Search</button>
+</form>
+
       <!-- User Dropdown -->
       @auth
       <div class="relative group">

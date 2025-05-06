@@ -12,6 +12,7 @@ class Pesanan extends Model
     protected $fillable = [
         'menu_id',
         'total_harga',
+        'alamat',
         'user_id',
         'status',
         'rating', // Pastikan kolom rating ada di tabel pesanan

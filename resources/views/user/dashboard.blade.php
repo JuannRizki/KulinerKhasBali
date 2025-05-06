@@ -15,30 +15,15 @@
     </div>
   </div>
   <div class="bg-white text-center py-8 rounded-lg shadow">
-  <h2 class="text-3xl font-bold text-green-700">Rasakan Cita Rasa Asli Bali!</h2>
-  <p class="text-gray-600 mt-2">Temukan dan pesan kuliner khas Bali favoritmu hanya di sini.</p>
-  <button class="mt-4 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition">Lihat Menu</button>
+  <h2 class="text-3xl font-bold text-green-700">Experience the Authentic Taste of Bali!</h2>
+  <p class="text-gray-600 mt-2">Discover and order your favorite Balinese cuisine right here.</p>
+  <button class="mt-4 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition">View Menu</button>
   <div class="mt-6">
     <i class="fas fa-arrow-down text-green-600 text-3xl"></i>
   </div>
 </div>
 
-
-  <!-- Navigation -->
-  <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4" data-carousel-prev>
-    <span class="inline-flex items-center justify-center w-8 h-8 bg-white/30 rounded-full">
-      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-      </svg>
-    </span>
-  </button>
-  <button type="button" class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4" data-carousel-next>
-    <span class="inline-flex items-center justify-center w-8 h-8 bg-white/30 rounded-full">
-      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
-    </span>
-  </button>
+  </div>
 </div>
 
 <!-- Menu -->
@@ -52,10 +37,10 @@
           <h5 class="text-lg font-semibold mb-2">{{ $menu->nama }}</h5>
 
           {{-- ⭐ Rating --}}
-          @if($menu->pesanans_avg_rating > 0)  <!-- Pastikan ini menggunakan nama yang benar -->
+          @if($menu->pesanans_avg_rating > 0)
             <div class="flex justify-center items-center mb-2">
               @for ($i = 1; $i <= 5; $i++)
-                @if($i <= floor($menu->pesanans_avg_rating))  <!-- Sesuaikan dengan nama variabel yang benar -->
+                @if($i <= floor($menu->pesanans_avg_rating))
                   <span class="text-yellow-400 text-lg">&#9733;</span>
                 @else
                   <span class="text-gray-300 text-lg">&#9733;</span>
@@ -77,11 +62,11 @@
              data-gambar="{{ asset('images/' . $menu->gambar) }}"
              data-harga="{{ $menu->harga }}"
              data-id="{{ $menu->id }}">
-             🛒 Order Now
+             🛒 Pesan Sekarang
           </a>
           @else
           <a href="{{ route('login') }}" class="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm">
-            Login untuk Order
+            Login untuk Pesan
           </a>
           @endauth
         </div>
@@ -90,29 +75,10 @@
   </div>
 </div>
 
-
 <!-- Order Modal -->
-@auth
-<div class="fixed inset-0 hidden flex items-center justify-center bg-black bg-opacity-50 z-50" id="orderModal">
-  <div class="bg-white rounded-lg w-96 p-6 relative">
-    <h5 class="text-xl font-bold mb-4" id="modalTitle"></h5>
-    <img id="modalImage" src="" alt="" class="w-full h-48 object-cover rounded mb-4">
-    <p id="modalHarga" class="text-green-600 font-bold mb-4"></p>
-    <input type="number" id="jumlahPesanan" class="border rounded w-full mb-4 p-2" value="1" min="1">
-    <form id="orderForm" action="{{ route('pesanan.store') }}" method="POST">
-      @csrf
-      <input type="hidden" name="menu_id" id="menu_id">
-      <input type="hidden" name="total_harga" id="total_harga">
-      <button type="submit" class="bg-green-600 w-full text-white rounded py-2 font-semibold">
-        Tambahkan Pesanan
-      </button>
-    </form>
-    <button onclick="document.getElementById('orderModal').classList.add('hidden')" class="absolute top-2 right-2 text-gray-500 hover:text-black">✖️</button>
-  </div>
-</div>
+<x-order-modal />
 
-@endauth
-<x-footer />
+
 
 <!-- Scripts -->
 <script>
@@ -152,5 +118,4 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-
 @endsection
