@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class AdminMiddleware
+class IsAdmin
 {
     public function handle(Request $request, Closure $next)
     {
@@ -13,6 +13,6 @@ class AdminMiddleware
             return $next($request);
         }
 
-        abort(403, 'Access denied: You are not an admin.');
+        abort(403, 'Akses ditolak. Anda bukan admin.');
     }
 }

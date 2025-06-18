@@ -1,36 +1,71 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Order;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    // Tampilkan daftar pesanan untuk admin
     public function index()
     {
-        $orders = Order::all(); // Ambil semua data pesanan
-        return view('admin.orders', compact('orders')); // Kirim data ke view
+        $orders = Pesanan::with(['pesananItems.menu', 'user'])->latest()->get();
+        return view('admin.orders', compact('orders'));
     }
 
-    public function create()
+    // Tandai pesanan sebagai sudah dibayar (manual)
+    public function markAsPaid($id)
     {
-        return view('admin.orders.create');
+        $order = Pesanan::findOrFail($id);
+
+        if ($order->status === 'unpaid') {
+            $order->status = 'paid';
+            $order->save();
+
+            return redirect()->route('admin.orders')->with('success', 'Order marked as paid successfully.');
+        }
+
+        return redirect()->route('admin.orders')->with('error', 'Order is not valid to mark as paid.');
     }
 
-    // Metode untuk menampilkan form edit
-    public function edit($id)
+    // Tandai pesanan sebagai sedang dikirim
+    public function markAsDelivered($id)
     {
-        $order = Order::findOrFail($id); // Cari pesanan berdasarkan ID
-        return view('admin.orders.edit', compact('order')); // Kirim data pesanan ke view
+        $order = Pesanan::findOrFail($id);
+
+        if ($order->status === 'paid') {
+            $order->status = 'being_delivered';
+            $order->save();
+
+            return redirect()->route('admin.orders')->with('success', 'Order marked as being delivered.');
+        }
+
+        return redirect()->route('admin.orders')->with('error', 'Order cannot be marked as delivered.');
     }
 
-    // Metode untuk menghapus pesanan
+    // Hapus pesanan
     public function destroy($id)
     {
-        $order = Order::findOrFail($id); // Cari pesanan berdasarkan ID
-        $order->delete(); // Hapus pesanan
+        $order = Pesanan::findOrFail($id);
+        $order->delete();
 
-        // Redirect kembali ke halaman daftar pesanan dengan pesan sukses
-        return redirect()->route('admin.orders')->with('success', 'Pesanan berhasil dihapus!');
+        return redirect()->route('admin.orders')->with('success', 'Order deleted successfully!');
+    }
+
+    // Approve pesanan (ubah status waiting_verification jadi paid)
+    public function approve($id)
+    {
+        $order = Pesanan::findOrFail($id);
+
+        if ($order->status === 'waiting_verification') {
+            $order->status = 'paid';
+            $order->status_pembayaran = 'paid'; // sesuaikan nama kolom jika perlu
+            $order->save();
+
+            return redirect()->route('admin.orders')->with('success', 'Order approved and marked as paid.');
+        }
+
+        return redirect()->route('admin.orders')->with('error', 'Order is not valid for approval.');
     }
 }

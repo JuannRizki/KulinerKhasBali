@@ -3,109 +3,180 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
+use App\Models\PesananItem;
+use App\Models\Cart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Midtrans\Snap;
+use Midtrans\Config;
 
 class PesananController extends Controller
 {
-    // Menampilkan daftar pesanan pengguna
+    public function __construct()
+    {
+        Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+    }
+
+    // Menampilkan daftar pesanan user
     public function index()
     {
-        $pesanans = Pesanan::where('user_id', auth()->id())->get();
+        $pesanans = Pesanan::where('user_id', auth()->id())
+            ->with('pesananItems.menu')
+            ->latest()
+            ->get();
+
         return view('user.pesanan.index', compact('pesanans'));
     }
 
-    // Menyimpan pesanan baru
+    // Menyimpan pesanan dan membuat Snap token
     public function store(Request $request)
     {
         $request->validate([
-            'menu_id' => 'required|exists:menus,id',
-            'total_harga' => 'required|numeric',
             'alamat' => 'required|string|max:255',
         ]);
 
-        Pesanan::create([
-            'menu_id'     => $request->menu_id,
-            'total_harga' => $request->total_harga,
-            'alamat'      => $request->alamat,
-            'user_id'     => auth()->id(),
-            'status'      => 'pending', // Status pesanan baru
-        ]);
+        $cart = Cart::with('menu')->where('user_id', auth()->id())->get();
 
-        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat!');
-    }
-
-    // Memberikan rating pada pesanan
-    public function updateRating(Request $request, $id)
-    {
-        $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-        ]);
-
-        $pesanan = Pesanan::findOrFail($id);
-
-        if ($pesanan->status !== 'paid') {
-            return redirect()->route('pesanan.index')->with('error', 'Bayar dulu sebelum beri rating.');
+        if ($cart->isEmpty()) {
+            return back()->with('error', 'Keranjang kamu kosong.');
         }
 
-        $pesanan->rating = $request->rating;
-        $pesanan->save();
+        DB::beginTransaction();
 
-        return redirect()->route('pesanan.index')->with('success', 'Rating berhasil ditambahkan!');
+        try {
+            $total = $cart->sum(fn($item) => $item->menu->harga * $item->jumlah);
+
+            $pesanan = Pesanan::create([
+                'user_id' => auth()->id(),
+                'alamat' => $request->alamat,
+                'total_harga' => $total,
+                'status' => 'unpaid',
+                'status_pembayaran' => 'pending',
+                'expired_at' => now()->addMinutes(15),
+            ]);
+
+            $orderId = 'ORDER-' . $pesanan->id;
+            $pesanan->update(['order_id' => $orderId]);
+
+            foreach ($cart as $item) {
+                PesananItem::create([
+                    'pesanan_id' => $pesanan->id,
+                    'menu_id' => $item->menu_id,
+                    'jumlah' => $item->jumlah,
+                    'harga_satuan' => $item->menu->harga,
+                ]);
+            }
+
+            $snapToken = Snap::getSnapToken([
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => $total,
+                ],
+                'customer_details' => [
+                    'first_name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                ],
+                'callbacks' => [
+                    'finish' => route('pesanan.index'),
+                ],
+            ]);
+
+            $pesanan->update([
+                'snap_token' => $snapToken,
+                'pembayaran' => 'midtrans',
+            ]);
+
+            Cart::where('user_id', auth()->id())->delete();
+
+            DB::commit();
+
+            return redirect()->route('pesanan.bayar', $pesanan->id);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal membuat pesanan: ' . $e->getMessage());
+        }
     }
 
-    // Memilih metode pembayaran dan mengubah status ke paid
-    public function updatePembayaran(Request $request, $id)
+    // Menampilkan halaman pembayaran Midtrans
+    public function bayar($id)
     {
-        $request->validate([
-            'pembayaran' => 'required|in:COD,Transfer Bank,QRIS',
-        ]);
+        $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
 
-        $pesanan = Pesanan::findOrFail($id);
+        return view('user.pesanan.pembayaran', compact('pesanan'));
+    }
 
-        if ($pesanan->status === 'paid') {
-            return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar!');
+    // Callback dari Midtrans
+    public function callback(Request $request)
+    {
+        Log::info('Midtrans Callback:', $request->all());
+
+        $serverKey = env('MIDTRANS_SERVER_KEY');
+        $signatureKey = hash('sha512',
+            $request->order_id .
+            $request->status_code .
+            $request->gross_amount .
+            $serverKey
+        );
+
+        if ($signatureKey !== $request->signature_key) {
+            Log::error('Signature key tidak valid.');
+            return response()->json(['message' => 'Signature tidak valid'], 403);
         }
 
-        $pesanan->pembayaran = $request->pembayaran;
-        $pesanan->status = 'paid';
-        $pesanan->save();
+        $parts = explode('-', $request->order_id);
+        $id = $parts[1] ?? null;
+        $pesanan = Pesanan::find($id);
 
-        return redirect()->route('pesanan.index')->with('success', 'Pembayaran berhasil!');
+        if (!$pesanan) {
+            Log::error("Pesanan dengan ID $id tidak ditemukan.");
+            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+        }
+
+        $status = $request->transaction_status;
+
+        if (in_array($status, ['capture', 'settlement'])) {
+            $pesanan->update([
+                'status' => 'paid',
+                'status_pembayaran' => 'dibayar',
+            ]);
+        } elseif ($status === 'expire') {
+            $pesanan->update(['status' => 'expired']);
+        } elseif ($status === 'cancel') {
+            $pesanan->update(['status' => 'canceled']);
+        }
+
+        return response()->json(['message' => 'Callback diproses']);
     }
 
-    // Membatalkan pesanan
+    // Batalkan pesanan oleh user jika belum dibayar
     public function batal($id)
     {
-        $pesanan = Pesanan::findOrFail($id);
+        $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
 
-        if ($pesanan->user_id !== auth()->id()) {
+        if ($pesanan->status !== 'paid') {
+            $pesanan->update(['status' => 'canceled']);
+            return redirect()->route('pesanan.index')->with('success', 'Pesanan dibatalkan.');
+        }
+
+        return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar, tidak bisa dibatalkan.');
+    }
+
+    // ✅ Cetak PDF struk
+    public function cetakStruk($id)
+    {
+        $pesanan = Pesanan::with('pesananItems.menu', 'user')->findOrFail($id);
+
+        if (auth()->id() !== $pesanan->user_id && !auth()->user()->is_admin) {
             abort(403);
         }
 
-        $pesanan->delete();
-
-        return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
-    }
-
-    // Menampilkan pesanan yang sudah dibayar
-    public function pembayaran()
-    {
-        $pesanans = Pesanan::where('user_id', auth()->id())
-                           ->where('status', 'paid')
-                           ->get();
-
-        return view('user.pembayaran.index', compact('pesanans'));
-    }
-
-    // Menampilkan detail struk dari pesanan yang sudah dibayar
-    public function detailStruk($id)
-    {
-        $pesanan = Pesanan::findOrFail($id);
-
-        if ($pesanan->status !== 'paid') {
-            return redirect()->route('pembayaran.index')->with('error', 'Pesanan belum dibayar.');
-        }
-
-        return view('user.pembayaran.detail', compact('pesanan'));
+        $pdf = Pdf::loadView('user.pesanan.struk', compact('pesanan'));
+        return $pdf->download('struk-' . $pesanan->order_id . '.pdf');
     }
 }

@@ -1,69 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="{ sidebarOpen: true }">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <script src="https://unpkg.com/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Flowbite CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.7.0/dist/flowbite.min.js"></script>
-    
-    <!-- Link ke FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-
-<body class="bg-gray-900 text-white">
-
+<body class="bg-gray-50 text-gray-800">
+  <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <div class="flex h-screen">
-        <!-- Sidebar Section -->
-        <div class="w-72 bg-gray-800 h-full p-6 space-y-8">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold text-white">Admin Panel</h1>
-            </div>
-            <ul class="space-y-4">
-                <li>
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition duration-300">
-                        <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.orders') }}" class="flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition duration-300">
-                        <i class="fas fa-boxes mr-3"></i> Kelola Pesanan
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.users') }}" class="flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition duration-300">
-                        <i class="fas fa-users mr-3"></i> Pengguna
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('menu.index') }}" class="flex items-center py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition duration-300">
-                        <i class="fas fa-utensils mr-3"></i> Daftar Menu
-                    </a>
-                </li>
-            </ul>
+    <aside :class="sidebarOpen ? 'w-60' : 'w-16'" class="bg-white border-r border-gray-200 transition-all duration-300 flex flex-col">
+      <!-- Sidebar Header -->
+      <div class="flex items-center justify-between p-4">
+        <span x-show="sidebarOpen" class="text-xl font-semibold text-indigo-600">Panel</span>
+        <button @click="sidebarOpen = !sidebarOpen" class="text-gray-600">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- Profile -->
+      <div class="flex flex-col items-center py-4">
+        <div class="w-16 h-16 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xl shadow">
+          <i class="fas fa-user"></i>
         </div>
+        <template x-if="sidebarOpen">
+          <div class="text-center mt-2">
+           
+            <div class="text-xs text-gray-500">{{ Auth::user()->role ?? 'Administrator' }}</div>
+          </div>
+        </template>
+      </div>
 
-        <!-- Main Content Section -->
-        <div class="flex-1 p-8 bg-gray-100 overflow-y-auto">
-            <!-- Navbar -->
-            <nav class="bg-gray-800 p-4 mb-6 flex justify-between items-center rounded-lg shadow-xl">
-                <div class="text-white font-semibold text-xl">Admin Dashboard</div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition duration-300 transform hover:scale-105">Logout</button>
-                </form>
-            </nav>
+      <!-- Sidebar Menu -->
+     <nav class="flex-1 px-2 space-y-1">
+  <a href="{{ route('admin.dashboard') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+    <i class="fas fa-home w-6 text-center text-indigo-600"></i>
+    <span x-show="sidebarOpen" class="ml-3">Dashboard</span>
+  </a>
+  <a href="{{ route('admin.orders') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+    <i class="fas fa-boxes w-6 text-center text-indigo-600"></i>
+    <span x-show="sidebarOpen" class="ml-3">Kelola Pesanan</span>
+  </a>
+  <a href="{{ route('admin.users') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+    <i class="fas fa-users w-6 text-center text-indigo-600"></i>
+    <span x-show="sidebarOpen" class="ml-3">Pengguna</span>
+  </a>
+  <a href="{{ route('menu.index') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+    <i class="fas fa-utensils w-6 text-center text-indigo-600"></i>
+    <span x-show="sidebarOpen" class="ml-3">Daftar Menu</span>
+  </a>
+  <!-- Kontak -->
+  <a href="{{ route('admin.contacts') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+    <i class="fas fa-envelope w-6 text-center text-indigo-600"></i>
+    <span x-show="sidebarOpen" class="ml-3">Kontak</span>
+  </a>
+</nav>
 
-            <!-- Content Area -->
-            @yield('content')
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col">
+      <!-- Navbar -->
+      <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div></div>
+        <div class="flex items-center gap-4">
+          <!-- Notifikasi -->
+          <button class="text-gray-600 hover:text-indigo-600 transition text-lg">
+            <i class="fas fa-bell"></i>
+          </button>
+
+
+          <!-- Logout -->
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button class="text-gray-600 hover:text-red-600 transition text-lg" title="Logout">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </form>
         </div>
-    </div>
+      </header>
 
+      <!-- Halaman Konten -->
+      <section class="p-6 overflow-auto">
+        @yield('content')
+      </section>
+    </main>
+  </div>
 </body>
 </html>

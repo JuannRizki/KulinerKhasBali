@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Cart;
+use App\Models\Pesanan;
 
 class User extends Authenticatable
 {
@@ -29,15 +31,27 @@ class User extends Authenticatable
         ];
     }
 
-    // Method untuk memeriksa apakah pengguna adalah admin
+    // Cek apakah user adalah admin
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
 
-    // Method untuk memeriksa apakah pengguna adalah user biasa
+    // Cek apakah user adalah user biasa
     public function isUser()
     {
         return $this->role === 'user';
+    }
+
+    // Relasi ke keranjang
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    // Relasi ke pesanan
+    public function pesanans()
+    {
+        return $this->hasMany(Pesanan::class);
     }
 }

@@ -7,30 +7,45 @@ use Illuminate\Http\Request;
 
 class KontakController extends Controller
 {
+    // 📥 Menampilkan form & pesan yang dikirim user
     public function index()
     {
-        // Mengambil semua pesan yang sudah ada di database, disusun berdasarkan yang terbaru
-        $kontaks = Kontak::latest()->get(); // Menampilkan pesan terbaru terlebih dahulu
+        $kontaks = Kontak::latest()->get(); // Menampilkan pesan terbaru dulu
         return view('user.kontak', compact('kontaks'));
     }
 
+    // 💾 Menyimpan pesan dari user
     public function store(Request $request)
     {
-        // Validasi input dari form kontak
         $request->validate([
-            'nama' => 'required|string|max:255',  // Nama tidak boleh kosong, dan maksimal 255 karakter
-            'email' => 'required|email|max:255', // Email harus valid dan maksimal 255 karakter
-            'pesan' => 'required|string',        // Pesan tidak boleh kosong
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'pesan' => 'required|string',
         ]);
 
-        // Simpan data kontak ke database
         Kontak::create([
-            'nama' => $request->nama,            // Nama pengirim pesan
-            'email' => $request->email,          // Email pengirim pesan
-            'pesan' => $request->pesan,          // Isi pesan
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'pesan' => $request->pesan,
         ]);
 
-        // Redirect ke halaman kontak dengan pesan sukses
         return redirect()->route('kontak')->with('success', 'Pesan Anda berhasil dikirim!');
+    }
+
+    // 📬 Admin: Melihat semua pesan dari user
+    public function lihatPesan()
+    {
+        $kontaks = Kontak::latest()->get();
+        return view('admin.contacts.index', compact('kontaks'));
+    }
+
+    // ❌ Admin: Menghapus pesan tertentu
+    public function hapusPesan($id)
+    {
+        $kontak = Kontak::findOrFail($id);
+        $kontak->delete();
+
+        return redirect()->route('admin.contacts')->with('success', 'Pesan berhasil dihapus.');
+
     }
 }

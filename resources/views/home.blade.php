@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="bg-white text-center py-8 rounded-lg shadow">
-  <h2 class="text-3xl font-bold text-green-700">Experience the Authentic Taste of Bali!</h2>
+  <h2 class="text-3xl font-bold text-green-700">Experience the Authentic Taste of Baliiii</h2>
   <p class="text-gray-600 mt-2">Discover and order your favorite Balinese cuisine right here.</p>
   <button class="mt-4 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition">View Menu</button>
   <div class="mt-6">
@@ -48,57 +48,6 @@
   </div>
 
 
-
-  <!-- Daftar Menu -->
-  <div class="pt-24 px-4">
-  <h2 class="text-2xl font-bold mb-6">Menu yang tersedia</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @foreach($menus as $menu)
-      <div class="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden">
-        <img src="{{ asset('images/' . $menu->gambar) }}" alt="{{ $menu->nama }}" class="w-full h-48 object-cover">
-        <div class="p-4 text-center">
-          <h5 class="text-lg font-semibold mb-2">{{ $menu->nama }}</h5>
-
-          {{-- ⭐ Rating --}}
-          @if($menu->pesanans_avg_rating > 0)
-            <div class="flex justify-center items-center mb-2">
-              @for ($i = 1; $i <= 5; $i++)
-                @if($i <= floor($menu->pesanans_avg_rating))
-                  <span class="text-yellow-400 text-lg">&#9733;</span>
-                @else
-                  <span class="text-gray-300 text-lg">&#9733;</span>
-                @endif
-              @endfor
-              <span class="ml-2 text-sm text-gray-600">({{ number_format($menu->pesanans_avg_rating, 1) }}/5)</span>
-            </div>
-          @else
-            <p class="text-gray-400 mb-2">Belum ada rating</p>
-          @endif
-
-          <p class="text-gray-500 mb-2">{{ $menu->deskripsi }}</p>
-          <p class="text-green-600 font-bold mb-4">Rp.{{ number_format($menu->harga, 0, ',', '.') }}</p>
-
-          @auth
-          <a href="#" 
-             class="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm order-btn"
-             data-nama="{{ $menu->nama }}"
-             data-gambar="{{ asset('images/' . $menu->gambar) }}"
-             data-harga="{{ $menu->harga }}"
-             data-id="{{ $menu->id }}">
-             🛒 Pesan Sekarang
-          </a>
-          @else
-          <a href="{{ route('login') }}" class="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm">
-            Login untuk Pesan
-          </a>
-          @endauth
-          
-        </div>
-      </div>
-      
-    @endforeach
-  </div>
-</div>
 
   <!-- Script Flowbite -->
   <script src="{{ asset('js/flowbite.min.js') }}"></script>

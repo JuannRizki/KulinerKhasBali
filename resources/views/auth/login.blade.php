@@ -13,12 +13,15 @@
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
+        <div class="mt-4 relative">
             <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full"
+            <x-text-input id="password" class="block mt-1 w-full pr-10"
                           type="password"
                           name="password"
                           required autocomplete="current-password" />
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-600" onclick="togglePassword()">
+                👁️
+            </span>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
@@ -30,6 +33,7 @@
             </label>
         </div>
 
+        <!-- Buttons -->
         <div class="flex items-center justify-between mt-4">
             @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
@@ -50,4 +54,12 @@
             </a>
         </div>
     </form>
+
+    <!-- Script for Toggle Password -->
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+        }
+    </script>
 </x-guest-layout>
