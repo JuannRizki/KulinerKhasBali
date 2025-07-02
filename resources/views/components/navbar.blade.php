@@ -10,7 +10,7 @@
     <div class="hidden md:flex items-center gap-6">
       <a href="{{ route('dashboard') }}" class="text-white hover:text-green-200">Home</a>
       <a href="{{ route('menu.terbaik') }}" class="text-white hover:text-green-200">Menu</a>
-      <a href="{{ route('pesanan.index') }}" class="text-white hover:text-green-200">Pembayaran</a>
+      <a href="{{ route('pesanan.index') }}" class="text-white hover:text-green-200">Payment</a>
       <a href="{{ route('orders.history') }}" class="text-white hover:text-green-200">History</a>
       <a href="{{ route('kontak') }}" class="text-white hover:text-green-200">Contact</a>
     </div>

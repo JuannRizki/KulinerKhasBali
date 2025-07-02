@@ -8,25 +8,26 @@ use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
-    // Menampilkan daftar menu (admin)
+    // 📦 Admin - Daftar semua menu
     public function index()
     {
         $menus = Menu::all();
         return view('admin.menu.index', compact('menus'));
     }
 
-    // Menampilkan form untuk menambahkan menu baru (admin)
+    // 🆕 Admin - Form tambah menu
     public function create()
     {
         return view('admin.menu.create');
     }
 
-    // Menyimpan menu baru (admin)
+    // 💾 Admin - Simpan menu baru
     public function store(Request $request)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
             'harga' => 'required|numeric',
+            'stok' => 'required|integer|min:0',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -34,9 +35,9 @@ class MenuController extends Controller
         $menu = new Menu();
         $menu->nama = $request->nama;
         $menu->harga = $request->harga;
+        $menu->stok = $request->stok;
         $menu->deskripsi = $request->deskripsi;
 
-        // Handle upload gambar jika ada
         if ($request->hasFile('gambar')) {
             $file = $request->file('gambar');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -46,31 +47,32 @@ class MenuController extends Controller
 
         $menu->save();
 
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil ditambahkan.');
+        return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil ditambahkan.');
     }
 
-    // Menampilkan form edit menu (admin)
+    // ✏️ Admin - Form edit menu
     public function edit(Menu $menu)
     {
         return view('admin.menu.edit', compact('menu'));
     }
 
-    // Memperbarui menu (admin)
+    // ✅ Admin - Update menu
     public function update(Request $request, Menu $menu)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
             'harga' => 'required|numeric',
+            'stok' => 'required|integer|min:0',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $menu->nama = $request->nama;
         $menu->harga = $request->harga;
+        $menu->stok = $request->stok;
         $menu->deskripsi = $request->deskripsi;
 
         if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada
             if ($menu->gambar && file_exists(public_path('images/' . $menu->gambar))) {
                 unlink(public_path('images/' . $menu->gambar));
             }
@@ -83,10 +85,10 @@ class MenuController extends Controller
 
         $menu->save();
 
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil diperbarui.');
+        return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil diperbarui.');
     }
 
-    // Menghapus menu (admin)
+    // ❌ Admin - Hapus menu
     public function destroy(Menu $menu)
     {
         if ($menu->gambar && file_exists(public_path('images/' . $menu->gambar))) {
@@ -95,41 +97,63 @@ class MenuController extends Controller
 
         $menu->delete();
 
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil dihapus.');
+        return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil dihapus.');
     }
 
-    // Menampilkan menu terbaik untuk user dengan rata-rata rating dari pesanan melalui relasi many-to-many
+    // ⭐ Tampilkan 10 menu terbaik berdasarkan rating dari pesanan_items
     public function terbaik()
     {
         $menus = Menu::leftJoin('pesanan_items', 'menus.id', '=', 'pesanan_items.menu_id')
-            ->leftJoin('pesanans', 'pesanan_items.pesanan_id', '=', 'pesanans.id')
-            ->select('menus.id', 'menus.nama', 'menus.deskripsi', 'menus.harga', 'menus.gambar', DB::raw('AVG(pesanans.rating) as avg_rating'))
-            ->groupBy('menus.id', 'menus.nama', 'menus.deskripsi', 'menus.harga', 'menus.gambar')
-            ->orderByDesc('avg_rating')
+            ->select(
+                'menus.id',
+                'menus.nama',
+                'menus.deskripsi',
+                'menus.harga',
+                'menus.gambar',
+                'menus.stok',
+                DB::raw('COALESCE(AVG(pesanan_items.rating), 0) as pesanan_items_avg_rating')
+            )
+            ->groupBy('menus.id', 'menus.nama', 'menus.deskripsi', 'menus.harga', 'menus.gambar', 'menus.stok')
+            ->orderByDesc('pesanan_items_avg_rating')
             ->take(10)
             ->get();
 
-        $user = auth()->user();
-
-        return view('user.menu.index', compact('menus', 'user'));
+        return view('user.menu.index', [
+            'menus' => $menus,
+            'user' => auth()->user(),
+        ]);
     }
 
-    // Menampilkan daftar menu untuk user dengan fitur pencarian dan pagination
+    // 🍽️ User - Lihat daftar menu (dengan pencarian + rating dari pesanan_items)
     public function userIndex(Request $request)
     {
         $search = $request->query('search');
 
-        $menus = Menu::query();
+        $menus = Menu::leftJoin('pesanan_items', 'menus.id', '=', 'pesanan_items.menu_id')
+            ->select(
+                'menus.id',
+                'menus.nama',
+                'menus.deskripsi',
+                'menus.harga',
+                'menus.gambar',
+                'menus.stok',
+                DB::raw('COALESCE(AVG(pesanan_items.rating), 0) as pesanan_items_avg_rating')
+            )
+            ->where('menus.stok', '>', 0)
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('menus.nama', 'like', '%' . $search . '%')
+                      ->orWhere('menus.deskripsi', 'like', '%' . $search . '%');
+                });
+            })
+            ->groupBy('menus.id', 'menus.nama', 'menus.deskripsi', 'menus.harga', 'menus.gambar', 'menus.stok')
+            ->orderByDesc('pesanan_items_avg_rating')
+            ->paginate(10)
+            ->withQueryString();
 
-        if ($search) {
-            $menus->where('nama', 'like', '%' . $search . '%')
-                ->orWhere('deskripsi', 'like', '%' . $search . '%');
-        }
-
-        $menus = $menus->paginate(10)->withQueryString();
-
-        $user = auth()->user();
-
-        return view('user.menu.index', compact('menus', 'user'));
+        return view('user.menu.index', [
+            'menus' => $menus,
+            'user' => auth()->user(),
+        ]);
     }
 }

@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="bg-white text-center py-8 rounded-lg shadow">
-  <h2 class="text-3xl font-bold text-green-700">Experience the Authentic Taste of Baliiii</h2>
+  <h2 class="text-3xl font-bold text-green-700">Experience the Authentic Taste of Balie</h2>
   <p class="text-gray-600 mt-2">Discover and order your favorite Balinese cuisine right here.</p>
   <button class="mt-4 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition">View Menu</button>
   <div class="mt-6">
