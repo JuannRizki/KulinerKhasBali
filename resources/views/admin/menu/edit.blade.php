@@ -21,12 +21,6 @@
                 <input type="number" id="harga" name="harga" value="{{ $menu->harga }}" class="w-full border border-gray-300 text-gray-800 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
 
-            <!-- Stok -->
-            <div>
-                <label for="stok" class="block text-gray-800 font-medium">Stok</label>
-                <input type="number" id="stok" name="stok" value="{{ $menu->stok }}" min="0" class="w-full border border-gray-300 text-gray-800 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            </div>
-
             <!-- Stock -->
             <div>
                 <label for="stok" class="block text-gray-800 font-medium">Stock</label>
@@ -52,8 +46,8 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-end space-x-2">
-                <a href="{{ route('menu.index') }}" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">Batal</a>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Perbarui</button>
+                <a href="{{ route('admin.menu.index') }}" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">Cancel</a>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Update</button>
             </div>
         </div>
     </form>

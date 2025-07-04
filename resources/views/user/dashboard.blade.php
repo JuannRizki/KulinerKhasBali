@@ -1,11 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
+
+<!-- Notification for Welcome Message -->
+@if(session('welcome'))
+  <div id="welcome-alert" style="position:fixed;left:50%;top:90px;transform:translateX(-50%);background:#22c55e;color:#fff;padding:18px 40px;border-radius:10px;z-index:9999;font-size:1.3rem;font-weight:bold;text-align:center;min-width:300px;max-width:95vw;opacity:1;transition:opacity 0.5s;">
+    {{ session('welcome') }}
+  </div>
+  <script>
+    setTimeout(function() {
+      var alert = document.getElementById('welcome-alert');
+      if(alert) {
+        alert.style.opacity = '0';
+        setTimeout(function() { alert.style.display = 'none'; }, 500);
+      }
+    }, 3000);
+  </script>
+@endif
+
 <!-- Carousel -->
 <div id="carouselExample" class="relative w-full" data-carousel="static">
   <div class="relative h-56 sm:h-72 xl:h-96 overflow-hidden rounded-lg">
-    <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
-      <img src="{{ asset('images/bali1.jpg') }}" class="w-full h-full object-cover" alt="Bali 1">
+    <!-- Slide 1 -->
+    <div class="duration-700 ease-in-out" data-carousel-item="active">
+      <img src="{{ asset('images/bg1.jpg') }}" class="w-full h-full object-cover" alt="Bali 1">
     </div>
     <!-- Slide 2 -->
     <div class="hidden duration-700 ease-in-out" data-carousel-item>

@@ -33,17 +33,7 @@
     <div class="hidden duration-700 ease-in-out" data-carousel-item>
       <img src="{{ asset('images/bg3.jpg') }}" class="w-full h-full object-cover" alt="Bali 3">
     </div>
-    <div class="bg-white text-center py-8 rounded-lg shadow">
-  <h2 class="text-3xl font-bold text-green-700">Experience the Authentic Taste of Baliiii</h2>
-  <p class="text-gray-600 mt-2">Discover and order your favorite Balinese cuisine right here.</p>
-  <button class="mt-4 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition">View Menu</button>
-  <div class="mt-6">
-    <i class="fas fa-arrow-down text-green-600 text-3xl"></i>
-  </div>
-</div>
-
-
-    <!-- Navigasi -->
+    <!-- Carousel controls -->
     <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
       <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/80 group-hover:bg-white/100 dark:bg-gray-800/30 dark:group-hover:bg-gray-800/60">
         <svg aria-hidden="true" class="w-6 h-6 text-gray-800 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>

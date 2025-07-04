@@ -27,6 +27,7 @@ class PesananController extends Controller
     public function index()
     {
         $pesanans = Pesanan::where('user_id', auth()->id())
+            ->whereNotIn('status', ['paid', 'canceled']) // exclude pesanan sudah dibayar & dibatalkan
             ->with('pesananItems.menu')
             ->latest()
             ->get();
@@ -196,5 +197,56 @@ class PesananController extends Controller
         }
         $pdf = Pdf::loadView('user.pesanan.struk_pdf', ['pesanan' => $pesanan]);
         return $pdf->download('struk-' . $pesanan->order_id . '.pdf');
+    }
+
+    public function detailStruk($id)
+    {
+        $pesanan = Pesanan::with('pesananItems.menu', 'user')->findOrFail($id);
+        if (auth()->id() !== $pesanan->user_id && !auth()->user()->is_admin) {
+            abort(403);
+        }
+        return view('user.pesanan.struk', ['pesanan' => $pesanan]);
+    }
+
+    public function updateRating(Request $request, $id)
+    {
+        $request->validate([
+            'ratings' => 'required|array',
+            'ratings.*' => 'nullable|integer|min:1|max:5',
+        ]);
+
+        $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
+
+        if ($pesanan->status !== 'paid') {
+            return back()->with('error', 'Hanya pesanan yang sudah dibayar yang bisa diberi rating.');
+        }
+
+        foreach ($request->ratings as $itemId => $rating) {
+            $item = PesananItem::where('id', $itemId)
+                ->where('pesanan_id', $pesanan->id)
+                ->first();
+
+            if ($item && $rating) {
+                $item->rating = $rating;
+                $item->save();
+            }
+        }
+
+        return back()->with('success', 'Rating berhasil dikirim.');
+    }
+
+    public function markPaid($id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->status = 'paid';
+        $pesanan->status_pembayaran = 'dibayar';
+        $pesanan->save();
+        $pesanan->refresh(); // pastikan data terbaru
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil ditandai sebagai sudah dibayar.',
+            'status' => $pesanan->status,
+            'status_pembayaran' => $pesanan->status_pembayaran
+        ]);
     }
 }

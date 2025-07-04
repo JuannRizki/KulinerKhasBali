@@ -36,7 +36,9 @@ Route::get('/redirect', function () {
         : redirect()->route('dashboard');
 })->middleware('auth');
 
-// 🔒 Semua route ini hanya untuk user yang sudah login
+// ==========================
+// 🔒 Hanya untuk user login
+// ==========================
 Route::middleware(['auth'])->group(function () {
     // 👤 Profil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -66,11 +68,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pesanan/{id}/detail', [PesananController::class, 'detailStruk'])->name('pesanan.detail');
     Route::get('/pesanan/{pesanan}/invoice', [PesananController::class, 'invoice'])->name('pesanan.invoice');
     Route::get('/pesanan/{id}/struk', [PesananController::class, 'cetakStruk'])->name('pesanan.cetakStruk');
-
-
-    // 📜 Riwayat Pesanan
-    Route::get('/history', [OrderController::class, 'history'])->name('orders.history');
-    Route::delete('/history/{id}', [OrderController::class, 'destroyUserOrder'])->name('orders.history.destroy');
+    Route::get('/pesanan/history', [PesananController::class, 'history'])->name('orders.history');
+    Route::post('/pesanan/{id}/mark-paid', [PesananController::class, 'markPaid'])->name('pesanan.markPaid');
 
     // 💬 Kontak
     Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
@@ -79,45 +78,58 @@ Route::middleware(['auth'])->group(function () {
     // 🍽️ Menu (untuk user)
     Route::get('/user/menus', [MenuController::class, 'userIndex'])->name('user.menu.index');
     Route::get('/menus', [MenuController::class, 'userIndex'])->name('user.menus.index');
+    // 🔍 Pencarian Menu
+    Route::get('/menu/search', [MenuController::class, 'userIndex'])->name('menu.search');
 
     // ==========================
     // 👑 ADMIN AREA
     // ==========================
-    Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-
-    // 💬 Kontak (admin)
-    Route::get('/admin/contacts', [KontakController::class, 'lihatPesan'])->name('admin.contacts');
-    Route::delete('/admin/contacts/{id}', [KontakController::class, 'hapusPesan'])->name('admin.hapusPesan');
-
-    // 👥 User (admin)
-    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
-    Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
-
-    // 📦 Pesanan (admin)
-    Route::get('/admin/orders', [OrderController::class, 'index'])->name('admin.orders');
-    Route::get('/admin/orders/create', [OrderController::class, 'create'])->name('admin.orders.create');
-    Route::post('/admin/orders', [OrderController::class, 'store'])->name('admin.orders.store');
-    Route::get('/admin/orders/{order}/edit', [OrderController::class, 'edit'])->name('admin.orders.edit');
-    Route::put('/admin/orders/{order}', [OrderController::class, 'update'])->name('admin.orders.update');
-    Route::delete('/admin/orders/{order}', [OrderController::class, 'destroy'])->name('admin.orders.destroy');
-
-    // ✅ Tambahan aksi manual untuk admin
-    Route::put('/admin/orders/{order}/approve', [OrderController::class, 'approve'])->name('admin.orders.approve');
-    Route::put('/admin/orders/{order}/mark-paid', [OrderController::class, 'markAsPaid'])->name('admin.orders.markPaid');
-    Route::put('/admin/orders/{order}/deliver', [OrderController::class, 'kirim'])->name('admin.orders.deliver');
-    Route::put('/admin/orders/{order}/mark-delivered', [OrderController::class, 'markAsDelivered'])->name('admin.orders.markDelivered');
-
-    // 🍽️ Menu (admin)
-    Route::get('/admin/menus', [MenuController::class, 'index'])->name('menu.index');
-    Route::get('/admin/menus/create', [MenuController::class, 'create'])->name('menu.create');
-    Route::post('/admin/menus', [MenuController::class, 'store'])->name('menu.store');
-    Route::get('/admin/menus/{menu}/edit', [MenuController::class, 'edit'])->name('menu.edit');
-    Route::put('/admin/menus/{menu}', [MenuController::class, 'update'])->name('menu.update');
-    Route::delete('/admin/menus/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/contacts', [KontakController::class, 'lihatPesan'])->name('contacts');
+        Route::delete('/contacts/{id}', [KontakController::class, 'hapusPesan'])->name('hapusPesan');
+        Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+        Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+        Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::put('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
+        Route::put('/orders/{order}/mark-paid', [OrderController::class, 'markAsPaid'])->name('orders.markPaid');
+        Route::put('/orders/{order}/deliver', [OrderController::class, 'kirim'])->name('orders.deliver');
+        Route::put('/orders/{order}/mark-delivered', [OrderController::class, 'markAsDelivered'])->name('orders.markDelivered');
+        Route::get('/menus', [MenuController::class, 'index'])->name('menu.index');
+        Route::get('/menus/create', [MenuController::class, 'create'])->name('menu.create');
+        Route::post('/menus', [MenuController::class, 'store'])->name('menu.store');
+        Route::get('/menus/{menu}/edit', [MenuController::class, 'edit'])->name('menu.edit');
+        Route::put('/menus/{menu}', [MenuController::class, 'update'])->name('menu.update');
+        Route::delete('/menus/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
+        Route::get('/rekap-penjualan', [RekapController::class, 'index'])->name('rekap.index');
+    });
 });
 
-// ✅ Midtrans Callback (tidak perlu login)
+// ==========================
+// ✅ Midtrans Callback TANPA auth
+// ==========================
 Route::post('/midtrans/callback', [PesananController::class, 'callback']);
 
 // Auth Laravel Breeze / Fortify
 require __DIR__.'/auth.php';
+
+// Alias agar route('menu.index') tetap bisa dipakai di luar admin
+Route::get('/admin-menus', [MenuController::class, 'index'])->name('menu.index');
+// Alias agar route('menu.create') tetap bisa dipakai di luar admin
+Route::get('/admin-menus/create', [MenuController::class, 'create'])->name('menu.create');
+// Alias agar route('menu.edit') tetap bisa dipakai di luar admin
+Route::get('/admin-menus/{menu}/edit', [MenuController::class, 'edit'])->name('menu.edit');
+// Alias agar route('menu.destroy') tetap bisa dipakai di luar admin
+Route::delete('/admin-menus/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
+
+// Alias agar route('admin.menu.create') tetap bisa dipakai
+Route::get('/admin-menus/create', [MenuController::class, 'create'])->name('admin.menu.create');
+// Alias agar route('admin.menu.edit') tetap bisa dipakai
+Route::get('/admin-menus/{menu}/edit', [MenuController::class, 'edit'])->name('admin.menu.edit');
+// Alias agar route('admin.menu.destroy') tetap bisa dipakai
+Route::delete('/admin-menus/{menu}', [MenuController::class, 'destroy'])->name('admin.menu.destroy');
