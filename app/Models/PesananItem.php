@@ -16,6 +16,7 @@ class PesananItem extends Model
         'menu_id',
         'jumlah',
         'harga_satuan',
+        'rating', // ⬅️ tambahkan ini
     ];
 
     public function pesanan()

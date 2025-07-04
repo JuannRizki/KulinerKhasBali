@@ -35,16 +35,17 @@
 </head>
 <body class="bg-fixed bg-cover bg-center" style="background-image: url('{{ asset('images/bali4.jpg') }}');">
 
-  <div class="min-h-screen bg-white/70 backdrop-blur-md">
+  <div class="min-h-screen flex flex-col bg-white/70 backdrop-blur-md">
 
     <x-navbar />
 
-    <div class="pt-24 px-4">
+    <div class="pt-24 px-4 flex-1">
       @yield('content')
     </div>
 
     <x-order-modal />
 
+    {{-- Footer --}}
     <x-footer />
 
   </div>

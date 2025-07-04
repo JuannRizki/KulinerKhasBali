@@ -17,8 +17,7 @@ class Pesanan extends Model
         'alamat',
         'user_id',
         'status',
-        'rating',
-        'expired_at',
+            'expired_at',
         'snap_token',
         'pembayaran',
         'status_pembayaran',
@@ -34,6 +33,11 @@ class Pesanan extends Model
     }
 
     public function pesananItems()
+    {
+        return $this->hasMany(PesananItem::class);
+    }
+
+    public function items()
     {
         return $this->hasMany(PesananItem::class);
     }

@@ -1,5 +1,5 @@
 <!-- resources/views/components/footer.blade.php -->
-<footer class="bg-green-600 text-white py-8 w-full">
+<footer class="bg-green-600 text-white py-8 w-full mt-12">
   <div class="max-w-screen-xl mx-auto px-4">
     <div class="flex justify-center items-center">
       <div>

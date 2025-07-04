@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pesanan;
 use App\Models\PesananItem;
 use App\Models\Cart;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,10 +23,11 @@ class PesananController extends Controller
         Config::$is3ds = true;
     }
 
-    // Menampilkan daftar pesanan user
+    // Method index sudah diubah: filter pesanan yg statusnya bukan 'paid'
     public function index()
     {
         $pesanans = Pesanan::where('user_id', auth()->id())
+            ->whereNotIn('status', ['paid', 'canceled']) // exclude pesanan sudah dibayar & dibatalkan
             ->with('pesananItems.menu')
             ->latest()
             ->get();
@@ -33,7 +35,17 @@ class PesananController extends Controller
         return view('user.pesanan.index', compact('pesanans'));
     }
 
-    // Menyimpan pesanan dan membuat Snap token
+    public function history()
+    {
+        $pesanans = Pesanan::where('user_id', auth()->id())
+            ->where('status', 'paid')
+            ->with('pesananItems.menu')
+            ->latest()
+            ->get();
+
+        return view('user.pesanan.history', compact('pesanans'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -41,7 +53,6 @@ class PesananController extends Controller
         ]);
 
         $cart = Cart::with('menu')->where('user_id', auth()->id())->get();
-
         if ($cart->isEmpty()) {
             return back()->with('error', 'Keranjang kamu kosong.');
         }
@@ -64,6 +75,14 @@ class PesananController extends Controller
             $pesanan->update(['order_id' => $orderId]);
 
             foreach ($cart as $item) {
+                $menu = Menu::find($item->menu_id);
+                if ($menu->stok < $item->jumlah) {
+                    DB::rollBack();
+                    return back()->with('error', "Stok untuk {$menu->nama} tidak mencukupi.");
+                }
+                $menu->stok -= $item->jumlah;
+                $menu->save();
+
                 PesananItem::create([
                     'pesanan_id' => $pesanan->id,
                     'menu_id' => $item->menu_id,
@@ -92,26 +111,21 @@ class PesananController extends Controller
             ]);
 
             Cart::where('user_id', auth()->id())->delete();
-
             DB::commit();
 
             return redirect()->route('pesanan.bayar', $pesanan->id);
-
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal membuat pesanan: ' . $e->getMessage());
         }
     }
 
-    // Menampilkan halaman pembayaran Midtrans
     public function bayar($id)
     {
         $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
-
         return view('user.pesanan.pembayaran', compact('pesanan'));
     }
 
-    // Callback dari Midtrans
     public function callback(Request $request)
     {
         Log::info('Midtrans Callback:', $request->all());
@@ -154,29 +168,85 @@ class PesananController extends Controller
         return response()->json(['message' => 'Callback diproses']);
     }
 
-    // Batalkan pesanan oleh user jika belum dibayar
     public function batal($id)
     {
         $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
-
         if ($pesanan->status !== 'paid') {
-            $pesanan->update(['status' => 'canceled']);
-            return redirect()->route('pesanan.index')->with('success', 'Pesanan dibatalkan.');
+            // Kembalikan stok menu
+            foreach ($pesanan->pesananItems as $item) {
+                $menu = $item->menu;
+                if ($menu) {
+                    $menu->stok += $item->jumlah;
+                    $menu->save();
+                }
+            }
+            // Hapus item pesanan
+            $pesanan->pesananItems()->delete();
+            // Hapus pesanan
+            $pesanan->delete();
+            return redirect()->route('pesanan.index')->with('success', 'Pesanan dibatalkan, stok dikembalikan, dan data dihapus.');
         }
-
         return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar, tidak bisa dibatalkan.');
     }
 
-    // ✅ Cetak PDF struk
     public function cetakStruk($id)
     {
         $pesanan = Pesanan::with('pesananItems.menu', 'user')->findOrFail($id);
-
         if (auth()->id() !== $pesanan->user_id && !auth()->user()->is_admin) {
             abort(403);
         }
-
-        $pdf = Pdf::loadView('user.pesanan.struk', compact('pesanan'));
+        $pdf = Pdf::loadView('user.pesanan.struk_pdf', ['pesanan' => $pesanan]);
         return $pdf->download('struk-' . $pesanan->order_id . '.pdf');
+    }
+
+    public function detailStruk($id)
+    {
+        $pesanan = Pesanan::with('pesananItems.menu', 'user')->findOrFail($id);
+        if (auth()->id() !== $pesanan->user_id && !auth()->user()->is_admin) {
+            abort(403);
+        }
+        return view('user.pesanan.struk', ['pesanan' => $pesanan]);
+    }
+
+    public function updateRating(Request $request, $id)
+    {
+        $request->validate([
+            'ratings' => 'required|array',
+            'ratings.*' => 'nullable|integer|min:1|max:5',
+        ]);
+
+        $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
+
+        if ($pesanan->status !== 'paid') {
+            return back()->with('error', 'Hanya pesanan yang sudah dibayar yang bisa diberi rating.');
+        }
+
+        foreach ($request->ratings as $itemId => $rating) {
+            $item = PesananItem::where('id', $itemId)
+                ->where('pesanan_id', $pesanan->id)
+                ->first();
+
+            if ($item && $rating) {
+                $item->rating = $rating;
+                $item->save();
+            }
+        }
+
+        return back()->with('success', 'Rating berhasil dikirim.');
+    }
+
+    public function markPaid($id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->status = 'paid';
+        $pesanan->status_pembayaran = 'dibayar';
+        $pesanan->save();
+        $pesanan->refresh(); // pastikan data terbaru
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil ditandai sebagai sudah dibayar.',
+            'status' => $pesanan->status,
+            'status_pembayaran' => $pesanan->status_pembayaran
+        ]);
     }
 }

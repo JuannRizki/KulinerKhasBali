@@ -28,6 +28,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = auth()->user();
+        session()->flash('welcome', 'Selamat datang, ' . $user->name . '!');
 
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');

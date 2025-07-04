@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6 max-w-screen-xl">
-    <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 Daftar Pesanan</h2>
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 Orders List</h2>
 
     @if(session('success'))
         <div class="bg-green-500 text-white p-4 mb-6 rounded-lg shadow-md">
@@ -22,6 +22,7 @@
                 <tr>
                     <th class="px-6 py-3 text-left">ID</th>
                     <th class="px-6 py-3 text-left">User</th>
+                    <th class="px-6 py-3 text-left">Makanan</th>
                     <th class="px-6 py-3 text-left">Total</th>
                     <th class="px-6 py-3 text-left">Alamat</th>
                     <th class="px-6 py-3 text-left">Status</th>
@@ -34,24 +35,35 @@
                 <tr class="border-t hover:bg-gray-100 transition-all duration-200">
                     <td class="px-6 py-4 text-gray-800">{{ $order->id }}</td>
                     <td class="px-6 py-4 text-gray-800">{{ $order->user->name ?? 'User #' . $order->user_id }}</td>
+                    <td class="px-6 py-4 text-gray-800">
+                        @if($order->pesananItems && count($order->pesananItems))
+                            <ul class="list-disc pl-4">
+                                @foreach($order->pesananItems as $item)
+                                    <li>{{ $item->menu->nama }} <span class="text-gray-500">x{{ $item->jumlah }}</span></li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <span class="text-gray-400 italic">-</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 text-gray-800">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                     <td class="px-6 py-4 text-gray-800">{{ $order->alamat }}</td>
                     <td class="px-6 py-4 text-gray-800">
                         @switch($order->status)
                             @case('waiting_verification')
-                                <span class="text-orange-500 font-semibold">Menunggu Verifikasi</span>
+                                <span class="text-orange-500 font-semibold">Waiting Verification</span>
                                 @break
                             @case('unpaid')
-                                <span class="text-red-600 font-semibold">Belum Dibayar</span>
+                                <span class="text-red-600 font-semibold">Unpaid</span>
                                 @break
                             @case('paid')
-                                <span class="text-green-600 font-semibold">Sudah Dibayar</span>
+                                <span class="text-green-600 font-semibold">Paid</span>
                                 @break
                             @case('being_delivered')
-                                <span class="text-yellow-600 font-semibold">Sedang Dikirim</span>
+                                <span class="text-yellow-600 font-semibold">Being Delivered</span>
                                 @break
                             @default
-                                <span class="text-gray-600">{{ $order->status }}</span>
+                                <span class="text-gray-600">{{ ucfirst($order->status) }}</span>
                         @endswitch
                     </td>
                     <td class="px-6 py-4 text-gray-800">{{ ucfirst($order->pembayaran ?? '-') }}</td>
@@ -63,7 +75,7 @@
                             @csrf
                             @method('PUT')
                             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">
-                                Setujui Manual
+                                Approve Manually
                             </button>
                         </form>
                         @endif
@@ -74,7 +86,7 @@
                             @csrf
                             @method('PUT')
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full">
-                                Tandai Lunas
+                                Mark as Paid
                             </button>
                         </form>
                         @endif
@@ -85,17 +97,17 @@
                             @csrf
                             @method('PUT')
                             <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 w-full">
-                                Tandai Dikirim
+                                Mark as Delivered
                             </button>
                         </form>
                         @endif
 
                         {{-- ❌ Hapus Pesanan --}}
-                        <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pesanan ini?')">
+                        <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 w-full">
-                                Hapus
+                                Delete
                             </button>
                         </form>
 

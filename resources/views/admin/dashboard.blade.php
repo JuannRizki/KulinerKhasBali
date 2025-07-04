@@ -1,4 +1,3 @@
-
 @extends('layouts.admin')
 
 @section('content')
@@ -9,32 +8,30 @@
     <hr class="mb-6">
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <!-- Kuliner -->
+        <!-- Menu -->
         <div class="bg-blue-200 text-gray-800 rounded-xl p-6 shadow hover:shadow-lg hover:scale-105 transition">
             <h3 class="text-xl font-semibold mb-2 flex items-center">
-                <i class="fas fa-utensils mr-2"></i> Kuliner
+                <i class="fas fa-utensils mr-2"></i> Menu
             </h3>
             <p class="text-3xl font-bold">{{ $totalMenus }}</p>
         </div>
 
-        <!-- Tamu -->
+        <!-- Users -->
         <div class="bg-green-200 text-gray-800 rounded-xl p-6 shadow hover:shadow-lg hover:scale-105 transition">
             <h3 class="text-xl font-semibold mb-2 flex items-center">
-                <i class="fas fa-users mr-2"></i> Tamu
+                <i class="fas fa-users mr-2"></i> Users
             </h3>
             <p class="text-3xl font-bold">{{ $totalUsers }}</p>
         </div>
 
-        <!-- Pesanan -->
+        <!-- Orders -->
         <div class="bg-yellow-200 text-gray-800 rounded-xl p-6 shadow hover:shadow-lg hover:scale-105 transition">
             <h3 class="text-xl font-semibold mb-2 flex items-center">
-                <i class="fas fa-shopping-cart mr-2"></i> Pesanan
+                <i class="fas fa-shopping-cart mr-2"></i> Orders
             </h3>
             <p class="text-3xl font-bold">{{ $totalPesanans }}</p>
-
-
+        </div>
+    </div>
+</div>
 @endsection
-
-</body>
-</html>
 

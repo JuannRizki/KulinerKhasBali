@@ -27,56 +27,55 @@
         </div>
         <template x-if="sidebarOpen">
           <div class="text-center mt-2">
-           
             <div class="text-xs text-gray-500">{{ Auth::user()->role ?? 'Administrator' }}</div>
           </div>
         </template>
       </div>
 
       <!-- Sidebar Menu -->
-     <nav class="flex-1 px-2 space-y-1">
-  <a href="{{ route('admin.dashboard') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
-    <i class="fas fa-home w-6 text-center text-indigo-600"></i>
-    <span x-show="sidebarOpen" class="ml-3">Dashboard</span>
-  </a>
-  <a href="{{ route('admin.orders') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
-    <i class="fas fa-boxes w-6 text-center text-indigo-600"></i>
-    <span x-show="sidebarOpen" class="ml-3">Kelola Pesanan</span>
-  </a>
-  <a href="{{ route('admin.users') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
-    <i class="fas fa-users w-6 text-center text-indigo-600"></i>
-    <span x-show="sidebarOpen" class="ml-3">Pengguna</span>
-  </a>
-  <a href="{{ route('menu.index') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
-    <i class="fas fa-utensils w-6 text-center text-indigo-600"></i>
-    <span x-show="sidebarOpen" class="ml-3">Daftar Menu</span>
-  </a>
-  <!-- Kontak -->
-  <a href="{{ route('admin.contacts') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
-    <i class="fas fa-envelope w-6 text-center text-indigo-600"></i>
-    <span x-show="sidebarOpen" class="ml-3">Kontak</span>
-  </a>
-</nav>
-
-
+      <nav class="flex-1 px-2 space-y-1">
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+          <i class="fas fa-home w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Dashboard</span>
+        </a>
+        <a href="{{ route('admin.orders') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+          <i class="fas fa-boxes w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Manage Orders</span>
+        </a>
+        <a href="{{ route('admin.users') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+          <i class="fas fa-users w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Users</span>
+        </a>
+        <a href="{{ route('admin.menu.index') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+          <i class="fas fa-utensils w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Menu List</span>
+        </a>
+        <a href="{{ route('admin.contacts') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+          <i class="fas fa-envelope w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Contacts</span>
+        </a>
+        <a href="{{ route('admin.rekap.index') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition text-gray-700">
+          <i class="fas fa-chart-line w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Sales Recap</span>
+        </a>
+      </nav>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col">
       <!-- Navbar -->
-      <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
-        <div></div>
+      <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div class="flex-1"></div>
         <div class="flex items-center gap-4">
           <!-- Notifikasi -->
           <button class="text-gray-600 hover:text-indigo-600 transition text-lg">
             <i class="fas fa-bell"></i>
           </button>
 
-
           <!-- Logout -->
           <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button class="text-gray-600 hover:text-red-600 transition text-lg" title="Logout">
+            <button type="submit" class="text-gray-600 hover:text-red-600 transition text-lg" title="Logout">
               <i class="fas fa-sign-out-alt"></i>
             </button>
           </form>

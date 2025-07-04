@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Midtrans\Config;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS jika tidak sedang di lingkungan lokal
+        if (env('APP_ENV') !== 'local') {
+            URL::forceScheme('https');
+        }
+
+        // Konfigurasi Midtrans
         Config::$serverKey = config('services.midtrans.server_key');
         Config::$clientKey = config('services.midtrans.client_key');
         Config::$isProduction = config('services.midtrans.is_production', false);
