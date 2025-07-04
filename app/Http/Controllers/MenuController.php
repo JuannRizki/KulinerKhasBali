@@ -103,9 +103,11 @@ class MenuController extends Controller
     // ⭐ Tampilkan 10 menu terbaik berdasarkan rating dari pesanan_items
     public function terbaik()
     {
-        $menus = Menu::withAvg('pesananItems as pesanan_items_avg_rating', 'rating')
-            ->where('stok', '>', 0)
-            ->orderByDesc('pesanan_items_avg_rating')
+        $menus = Menu::leftJoin('pesanan_items', 'menus.id', '=', 'pesanan_items.menu_id')
+            ->leftJoin('pesanans', 'pesanan_items.pesanan_id', '=', 'pesanans.id')
+            ->select('menus.id', 'menus.nama', 'menus.deskripsi', 'menus.harga', 'menus.gambar', DB::raw('AVG(pesanans.rating) as avg_rating'))
+            ->groupBy('menus.id', 'menus.nama', 'menus.deskripsi', 'menus.harga', 'menus.gambar')
+            ->orderByDesc('avg_rating')
             ->take(10)
             ->get();
 
@@ -120,17 +122,16 @@ class MenuController extends Controller
     {
         $search = $request->query('search');
 
-        $menus = Menu::withAvg('pesananItems as pesanan_items_avg_rating', 'rating')
-            ->where('stok', '>', 0)
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('nama', 'like', '%' . $search . '%')
-                      ->orWhere('deskripsi', 'like', '%' . $search . '%');
-                });
-            })
-            ->orderByDesc('pesanan_items_avg_rating')
-            ->paginate(10)
-            ->withQueryString();
+        $menus = Menu::query();
+
+        if ($search) {
+            $menus->where('nama', 'like', '%' . $search . '%')
+                ->orWhere('deskripsi', 'like', '%' . $search . '%');
+        }
+
+        $menus = $menus->paginate(10)->withQueryString();
+
+        $user = auth()->user();
 
         return view('user.menu.index', [
             'menus' => $menus,

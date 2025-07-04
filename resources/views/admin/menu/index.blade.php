@@ -3,13 +3,8 @@
 @section('content')
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <h2 class="text-3xl font-bold text-gray-800">Menu List</h2>
-        </div>
-        <a href="{{ route('admin.menu.create') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition-colors duration-200">+ Add Menu</a>
+        <h2 class="text-3xl font-bold text-gray-800">Daftar Menu</h2>
+        <a href="{{ route('menu.create') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition-colors duration-200">+ Tambah Menu</a>
     </div>
 
     @if(session('success'))
@@ -22,11 +17,10 @@
         <thead class="bg-gray-800 text-white">
             <tr>
                 <th class="px-6 py-3 text-left">No</th>
-                <th class="px-6 py-3 text-left">Name</th>
-                <th class="px-6 py-3 text-left">Price</th>
-                <th class="px-6 py-3 text-left">Stock</th>
-                <th class="px-6 py-3 text-left">Image</th>
-                <th class="px-6 py-3 text-left">Action</th>
+                <th class="px-6 py-3 text-left">Nama</th>
+                <th class="px-6 py-3 text-left">Harga</th>
+                <th class="px-6 py-3 text-left">Gambar</th>
+                <th class="px-6 py-3 text-left">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -45,8 +39,8 @@
                 </td>
                 <td class="px-6 py-4">
                     <div class="space-x-2">
-                        <a href="{{ route('admin.menu.edit', $menu->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors duration-200">Edit</a>
-                        <form action="{{ route('admin.menu.destroy', $menu->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this menu?')">
+                        <a href="{{ route('menu.edit', $menu->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors duration-200">Edit</a>
+                        <form action="{{ route('menu.destroy', $menu->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus menu ini?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200">Delete</button>
