@@ -4,47 +4,75 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pesanan;
+use App\Models\PesananItem;
+use App\Models\Menu;
+use Illuminate\Support\Facades\DB;
 
 class RekapController extends Controller
 {
     public function index(Request $request)
     {
-        // Filter berdasarkan tanggal dari form filter
-        $start = $request->input('start_date');
-        $end = $request->input('end_date');
+        $start = $request->input('start_date') ?? now()->startOfMonth()->format('Y-m-d');
+        $end = $request->input('end_date') ?? now()->format('Y-m-d');
+        $keyword = $request->input('keyword');
 
+        // Filter pesanan paid + tanggal
         $query = Pesanan::where('status', 'paid');
 
         if ($start && $end) {
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $rekap = $query->with(['user', 'items.menu'])->orderBy('created_at', 'desc')->get();
+        $rekap = $query->with(['user', 'items.menu'])
+                       ->orderBy('created_at', 'desc')
+                       ->get();
 
-        // Total penjualan
         $totalPendapatan = $rekap->sum('total_harga');
 
-        // Cari makanan paling laris
-        $makananTerlaris = null;
+        // 🔍 Hitung total penjualan menu yang dicari
+        $menuYangDicari = null;
         $jumlahTerjual = 0;
-        $itemQuery = \App\Models\PesananItem::query();
-        $itemQuery->whereHas('pesanan', function($q) use ($start, $end) {
-            $q->where('status', 'paid');
-            if ($start && $end) {
-                $q->whereBetween('created_at', [$start, $end]);
-            }
-        });
-        $terlaris = $itemQuery->select('menu_id')
-            ->selectRaw('SUM(jumlah) as total_terjual') // ganti qty menjadi jumlah
-            ->groupBy('menu_id')
-            ->orderByDesc('total_terjual')
-            ->first();
-        if ($terlaris) {
-            $menu = \App\Models\Menu::find($terlaris->menu_id);
-            $makananTerlaris = $menu ? $menu->nama : null;
-            $jumlahTerjual = $terlaris->total_terjual;
+
+        if ($keyword) {
+            $itemQuery = PesananItem::whereHas('menu', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', '%' . $keyword . '%');
+                })
+                ->whereHas('pesanan', function ($q) use ($start, $end) {
+                    $q->where('status', 'paid');
+                    if ($start && $end) {
+                        $q->whereBetween('created_at', [$start, $end]);
+                    }
+                });
+
+            $total = $itemQuery->sum('jumlah');
+
+            $menuYangDicari = $keyword;
+            $jumlahTerjual = $total;
         }
 
-        return view('admin.rekap.index', compact('rekap', 'totalPendapatan', 'start', 'end', 'makananTerlaris', 'jumlahTerjual'));
+        // Chart harian tetap
+        $harian = Pesanan::where('status', 'paid')
+            ->when($start && $end, function ($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end]);
+            })
+            ->select(DB::raw('DATE(created_at) as tanggal'), DB::raw('SUM(total_harga) as total'))
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
+        $labels = $harian->pluck('tanggal')->toArray();
+        $totals = $harian->pluck('total')->toArray();
+
+        return view('admin.rekap.index', compact(
+            'rekap',
+            'totalPendapatan',
+            'start',
+            'end',
+            'keyword',
+            'menuYangDicari',
+            'jumlahTerjual',
+            'labels',
+            'totals'
+        ));
     }
 }

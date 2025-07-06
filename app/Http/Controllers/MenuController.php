@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
@@ -100,7 +99,7 @@ class MenuController extends Controller
         return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil dihapus.');
     }
 
-    // ⭐ Tampilkan 10 menu terbaik berdasarkan rating dari pesanan_items
+    // ⭐ Tampilkan 10 menu terbaik berdasarkan rating
     public function terbaik()
     {
         $menus = Menu::withAvg('pesananItems as pesanan_items_avg_rating', 'rating')
@@ -115,7 +114,7 @@ class MenuController extends Controller
         ]);
     }
 
-    // 🍽️ User - Lihat daftar menu (dengan pencarian + rating dari pesanan_items)
+    // 🍽️ User - Daftar menu (search di nama saja)
     public function userIndex(Request $request)
     {
         $search = $request->query('search');
@@ -123,10 +122,7 @@ class MenuController extends Controller
         $menus = Menu::withAvg('pesananItems as pesanan_items_avg_rating', 'rating')
             ->where('stok', '>', 0)
             ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('nama', 'like', '%' . $search . '%')
-                      ->orWhere('deskripsi', 'like', '%' . $search . '%');
-                });
+                $query->where('nama', 'like', '%' . $search . '%');
             })
             ->orderByDesc('pesanan_items_avg_rating')
             ->paginate(10)

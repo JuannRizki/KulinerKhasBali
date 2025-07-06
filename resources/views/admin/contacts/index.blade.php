@@ -24,6 +24,7 @@
                 <th class="p-2 border">Name</th>
                 <th class="p-2 border">Email</th>
                 <th class="p-2 border">Message</th>
+                <th class="p-2 border">Reply</th>
                 <th class="p-2 border">Date</th>
                 <th class="p-2 border">Action</th>
             </tr>
@@ -34,8 +35,22 @@
                     <td class="p-2">{{ $kontak->nama }}</td>
                     <td class="p-2">{{ $kontak->email }}</td>
                     <td class="p-2">{{ $kontak->pesan }}</td>
+                    <td class="p-2">
+                        @if($kontak->balasan)
+                            <div class="bg-green-50 p-2 rounded text-sm text-green-700">{{ $kontak->balasan }}</div>
+                        @else
+                            <span class="text-gray-400 text-sm">No reply yet</span>
+                        @endif
+                    </td>
                     <td class="p-2 text-sm text-gray-600">{{ $kontak->created_at->format('d M Y H:i') }}</td>
                     <td class="p-2">
+                        <form action="{{ route('admin.balasPesan', $kontak->id) }}" method="POST" class="mb-2">
+                            @csrf
+                            @method('PUT')
+                            <textarea name="balasan" rows="2" placeholder="Write reply..." class="border p-1 w-full mb-1">{{ $kontak->balasan }}</textarea>
+                            <button type="submit" class="bg-indigo-500 text-white px-3 py-1 rounded">Reply</button>
+                        </form>
+
                         <form action="{{ route('admin.hapusPesan', $kontak->id) }}" method="POST" onsubmit="return confirm('Delete this message?')">
                             @csrf
                             @method('DELETE')
@@ -45,7 +60,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="p-4 text-center text-gray-500">No messages found.</td>
+                    <td colspan="6" class="p-4 text-center text-gray-500">No messages found.</td>
                 </tr>
             @endforelse
         </tbody>

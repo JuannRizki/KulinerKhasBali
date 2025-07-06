@@ -42,17 +42,27 @@
         </form>
 
         <!-- Displaying User Messages -->
-        <div class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">User Messages</h2>
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your Messages</h2>
 
-            @foreach($kontaks as $kontak)
-                <div class="border-b pb-4 mb-4">
-                    <p class="font-medium text-gray-700">{{ $kontak->nama }}</p>
-                    <p class="text-gray-500 text-sm">{{ $kontak->email }}</p>
-                    <p class="mt-2 text-gray-800">{{ $kontak->pesan }}</p>
-                    <p class="mt-2 text-sm text-gray-500">{{ $kontak->created_at->diffForHumans() }}</p>
+            @forelse($kontaks as $kontak)
+                <div class="bg-white border border-gray-300 rounded-lg p-4 mb-6 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-medium text-gray-700">{{ $kontak->nama }}</p>
+                        <p class="text-sm text-gray-500">{{ $kontak->created_at->format('d M Y H:i') }}</p>
+                    </div>
+                    <p class="text-gray-800">{{ $kontak->pesan }}</p>
+
+                    @if($kontak->balasan)
+                        <div class="mt-4 p-4 border border-green-300 bg-green-50 rounded">
+                            <p class="font-semibold text-green-700 mb-1">Admin Reply:</p>
+                            <p class="text-green-800">{{ $kontak->balasan }}</p>
+                        </div>
+                    @endif
                 </div>
-            @endforeach
+            @empty
+                <p class="text-gray-500">No messages yet.</p>
+            @endforelse
         </div>
     </div>
 @endsection

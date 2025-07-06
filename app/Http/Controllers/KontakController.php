@@ -7,14 +7,14 @@ use Illuminate\Http\Request;
 
 class KontakController extends Controller
 {
-    // 📥 Menampilkan form & pesan yang dikirim user
+    // 📥 Form & kirim pesan user
     public function index()
     {
-        $kontaks = Kontak::latest()->get(); // Menampilkan pesan terbaru dulu
+        $kontaks = Kontak::latest()->get();
         return view('user.kontak', compact('kontaks'));
     }
 
-    // 💾 Menyimpan pesan dari user
+    // 💾 Simpan pesan user
     public function store(Request $request)
     {
         $request->validate([
@@ -32,20 +32,33 @@ class KontakController extends Controller
         return redirect()->route('kontak')->with('success', 'Pesan Anda berhasil dikirim!');
     }
 
-    // 📬 Admin: Melihat semua pesan dari user
+    // 📬 Admin: Lihat semua pesan
     public function lihatPesan()
     {
         $kontaks = Kontak::latest()->get();
         return view('admin.contacts.index', compact('kontaks'));
     }
 
-    // ❌ Admin: Menghapus pesan tertentu
+    // ❌ Admin: Hapus pesan
     public function hapusPesan($id)
     {
         $kontak = Kontak::findOrFail($id);
         $kontak->delete();
 
         return redirect()->route('admin.contacts')->with('success', 'Pesan berhasil dihapus.');
+    }
 
+    // ✅ Admin: Balas pesan
+    public function balasPesan(Request $request, $id)
+    {
+        $request->validate([
+            'balasan' => 'required|string',
+        ]);
+
+        $kontak = Kontak::findOrFail($id);
+        $kontak->balasan = $request->balasan;
+        $kontak->save();
+
+        return redirect()->route('admin.contacts')->with('success', 'Pesan berhasil dibalas.');
     }
 }
