@@ -108,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/menus/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
         Route::get('/rekap-penjualan', [RekapController::class, 'index'])->name('rekap.index');
         Route::put('/contacts/{id}/reply', [KontakController::class, 'balasPesan'])->name('balasPesan');
+        
 
     });
 });

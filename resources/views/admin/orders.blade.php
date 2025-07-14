@@ -102,15 +102,7 @@
                         </form>
                         @endif
 
-                        {{-- ❌ Hapus Pesanan --}}
-                        <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 w-full">
-                                Delete
-                            </button>
-                        </form>
-
+                     
                     </td>
                 </tr>
                 @endforeach
