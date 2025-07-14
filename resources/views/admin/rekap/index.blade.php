@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-6 max-w-screen-xl">
     <h2 class="text-3xl font-bold text-gray-800 mb-6">📊 Sales Recap</h2>
 
-    {{-- 🔍 Filter Tanggal & Keyword --}}
+    {{-- 🔍 Filter Tanggal, Keyword & Status --}}
     <form method="GET" class="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap items-end gap-4">
         <div>
             <label for="start_date" class="block font-semibold text-gray-700">From Date</label>
@@ -19,19 +19,27 @@
             <input type="text" name="keyword" id="keyword" value="{{ $keyword ?? '' }}" placeholder="e.g. ayam" class="border border-gray-300 rounded px-4 py-2 w-48">
         </div>
         <div>
+            <label for="status" class="block font-semibold text-gray-700">Status</label>
+            <select name="status" id="status" class="border border-gray-300 rounded px-4 py-2 w-48">
+                <option value="" {{ request('status') == '' ? 'selected' : '' }}>All (Paid & Delivered)</option>
+                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid Only</option>
+                <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered Only</option>
+            </select>
+        </div>
+        <div>
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-5">
                 Filter
             </button>
         </div>
     </form>
 
-    {{-- 📈 Diagram Penjualan Harian --}}
+    {{-- 📈 Chart --}}
     <div class="bg-white rounded-lg shadow p-4 mb-8">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Daily Sales Chart</h3>
         <canvas id="salesChart" height="100"></canvas>
     </div>
 
-    {{-- 🍽️ Penjualan Menu Dicari --}}
+    {{-- 🍽️ Pencarian Menu --}}
     <div class="mb-6">
         <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
             <span class="font-semibold text-green-700">Menu Sales Search:</span>

@@ -73,7 +73,7 @@
             @csrf
             <label class="block">
                 <span class="text-gray-700">Shipping Address</span>
-                <textarea name="alamat" required class="w-full mt-1 border rounded px-3 py-2" rows="3" placeholder="Enter your complete shipping address..."></textarea>
+                <textarea name="alamat" required class="w-full mt-1 border rounded px-3 py-2" rows="3" placeholder="Enter your complete shipping address...">{{ Auth::user()->alamat }}</textarea>
             </label>
             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                 🧾 Place Order Now

@@ -50,7 +50,7 @@
         </div>
 
         {{-- Rating Bintang --}}
-        @if($pesanan->status === 'paid')
+        @if(in_array($pesanan->status, ['paid', 'being_delivered']))
             <div class="mt-8">
                 <h3 class="text-lg font-semibold mb-4">Beri Rating Menu</h3>
                 <form action="{{ route('pesanan.rating', $pesanan->id) }}" method="POST">

@@ -16,8 +16,8 @@ class RekapController extends Controller
         $end = $request->input('end_date') ?? now()->format('Y-m-d');
         $keyword = $request->input('keyword');
 
-        // Filter pesanan paid + tanggal
-        $query = Pesanan::where('status', 'paid');
+        // ✅ Filter status LUNAS & DIKIRIM
+        $query = Pesanan::whereIn('status', ['paid', 'being_delivered', 'delivered']);
 
         if ($start && $end) {
             $query->whereBetween('created_at', [$start, $end]);
@@ -38,7 +38,7 @@ class RekapController extends Controller
                     $q->where('nama', 'like', '%' . $keyword . '%');
                 })
                 ->whereHas('pesanan', function ($q) use ($start, $end) {
-                    $q->where('status', 'paid');
+                    $q->whereIn('status', ['paid', 'being_delivered', 'delivered']);
                     if ($start && $end) {
                         $q->whereBetween('created_at', [$start, $end]);
                     }
@@ -50,8 +50,8 @@ class RekapController extends Controller
             $jumlahTerjual = $total;
         }
 
-        // Chart harian tetap
-        $harian = Pesanan::where('status', 'paid')
+        // ✅ Chart harian hitung semua status valid
+        $harian = Pesanan::whereIn('status', ['paid', 'being_delivered', 'delivered'])
             ->when($start && $end, function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })
@@ -76,3 +76,4 @@ class RekapController extends Controller
         ));
     }
 }
+

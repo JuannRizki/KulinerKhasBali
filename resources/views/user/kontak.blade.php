@@ -14,7 +14,12 @@
             @csrf
             <div class="mb-4">
                 <label for="nama" class="block text-sm font-medium text-gray-700">Name</label>
-                <input type="text" id="nama" name="nama" class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                <input type="text" 
+                       id="nama" 
+                       name="nama" 
+                       value="{{ Auth::user()->name }}" 
+                       class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                       readonly>
                 @error('nama')
                     <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
                 @enderror
@@ -22,7 +27,12 @@
 
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="email" name="email" class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       value="{{ Auth::user()->email }}" 
+                       class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                       readonly>
                 @error('email')
                     <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
                 @enderror

@@ -23,11 +23,10 @@ class PesananController extends Controller
         Config::$is3ds = true;
     }
 
-    // Method index sudah diubah: filter pesanan yg statusnya bukan 'paid'
     public function index()
     {
         $pesanans = Pesanan::where('user_id', auth()->id())
-            ->whereNotIn('status', ['paid', 'canceled']) // exclude pesanan sudah dibayar & dibatalkan
+            ->whereNotIn('status', ['paid', 'canceled', 'being_delivered'])
             ->with('pesananItems.menu')
             ->latest()
             ->get();
@@ -38,7 +37,7 @@ class PesananController extends Controller
     public function history()
     {
         $pesanans = Pesanan::where('user_id', auth()->id())
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'being_delivered'])
             ->with('pesananItems.menu')
             ->latest()
             ->get();
@@ -171,8 +170,7 @@ class PesananController extends Controller
     public function batal($id)
     {
         $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
-        if ($pesanan->status !== 'paid') {
-            // Kembalikan stok menu
+        if (!in_array($pesanan->status, ['paid', 'being_delivered'])) {
             foreach ($pesanan->pesananItems as $item) {
                 $menu = $item->menu;
                 if ($menu) {
@@ -180,13 +178,11 @@ class PesananController extends Controller
                     $menu->save();
                 }
             }
-            // Hapus item pesanan
             $pesanan->pesananItems()->delete();
-            // Hapus pesanan
             $pesanan->delete();
-            return redirect()->route('pesanan.index')->with('success', 'Pesanan dibatalkan, stok dikembalikan, dan data dihapus.');
+            return redirect()->route('pesanan.index')->with('success', 'Pesanan dibatalkan.');
         }
-        return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar, tidak bisa dibatalkan.');
+        return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar atau sedang dikirim, tidak bisa dibatalkan.');
     }
 
     public function cetakStruk($id)
@@ -205,7 +201,7 @@ class PesananController extends Controller
         if (auth()->id() !== $pesanan->user_id && !auth()->user()->is_admin) {
             abort(403);
         }
-        return view('user.pesanan.struk', ['pesanan' => $pesanan]);
+        return view('user.pesanan.struk', compact('pesanan'));
     }
 
     public function updateRating(Request $request, $id)
@@ -217,8 +213,8 @@ class PesananController extends Controller
 
         $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
 
-        if ($pesanan->status !== 'paid') {
-            return back()->with('error', 'Hanya pesanan yang sudah dibayar yang bisa diberi rating.');
+        if (!in_array($pesanan->status, ['paid', 'being_delivered'])) {
+            return back()->with('error', 'Hanya pesanan yang sudah dibayar atau sedang dikirim yang bisa diberi rating.');
         }
 
         foreach ($request->ratings as $itemId => $rating) {
@@ -241,7 +237,7 @@ class PesananController extends Controller
         $pesanan->status = 'paid';
         $pesanan->status_pembayaran = 'dibayar';
         $pesanan->save();
-        $pesanan->refresh(); // pastikan data terbaru
+        $pesanan->refresh();
         return response()->json([
             'success' => true,
             'message' => 'Pesanan berhasil ditandai sebagai sudah dibayar.',
