@@ -83,10 +83,7 @@
       <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
         <h1 class="text-lg font-bold text-gray-800">@yield('page-title', 'Admin')</h1>
         <div class="flex items-center gap-4">
-          <!-- Notification Icon -->
-          <button class="text-gray-600 hover:text-indigo-600 transition text-lg">
-            <i class="fas fa-bell"></i>
-          </button>
+         
 
           <!-- Logout -->
           <form action="{{ route('logout') }}" method="POST">
