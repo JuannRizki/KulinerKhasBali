@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-    <h2 class="text-2xl font-semibold mb-6 text-center">Edit Profil</h2>
+    <h2 class="text-2xl font-semibold mb-6 text-center">Edit Profile</h2>
 
     @if (session('success'))
         <div class="mb-4 p-3 text-green-700 bg-green-100 rounded">
@@ -15,7 +15,7 @@
         @method('PATCH')
 
         <div class="mb-4">
-            <label class="block mb-1 text-sm font-medium">Nama</label>
+            <label class="block mb-1 text-sm font-medium">Name</label>
             <input type="text" name="name" value="{{ old('name', $user->name) }}"
                 class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             @error('name')
@@ -33,7 +33,7 @@
         </div>
 
         <div class="mb-4">
-            <label class="block mb-1 text-sm font-medium">Alamat</label>
+            <label class="block mb-1 text-sm font-medium">Address</label>
             <textarea name="alamat" rows="3"
                 class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>{{ old('alamat', $user->alamat) }}</textarea>
             @error('alamat')
@@ -42,7 +42,7 @@
         </div>
 
         <div class="mb-4">
-            <label class="block mb-1 text-sm font-medium">Password Baru <span class="text-gray-500">(Opsional)</span></label>
+            <label class="block mb-1 text-sm font-medium">New Password <span class="text-gray-500">(Optional)</span></label>
             <input type="password" name="password"
                 class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
             @error('password')
@@ -51,13 +51,13 @@
         </div>
 
         <div class="mb-4">
-            <label class="block mb-1 text-sm font-medium">Konfirmasi Password</label>
+            <label class="block mb-1 text-sm font-medium">Confirm Password</label>
             <input type="password" name="password_confirmation"
                 class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
 
         <button type="submit"
-            class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">Simpan</button>
+            class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">Save</button>
     </form>
 </div>
 @endsection

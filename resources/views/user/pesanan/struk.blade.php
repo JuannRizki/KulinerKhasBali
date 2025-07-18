@@ -11,24 +11,24 @@
             </div>
         @endif
 
-        {{-- Info Pesanan --}}
+        {{-- Order Info --}}
         <div class="mb-6">
-            <h2 class="text-2xl font-bold mb-2">Struk Pesanan</h2>
-            <p><strong>Nama:</strong> {{ $pesanan->user->name }}</p>
-            <p><strong>Kode Pesanan:</strong> {{ $pesanan->order_id }}</p>
-            <p><strong>Tanggal:</strong> {{ $pesanan->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
-            <p><strong>Alamat:</strong> {{ $pesanan->alamat }}</p>
+            <h2 class="text-2xl font-bold mb-2">Order Receipt</h2>
+            <p><strong>Name:</strong> {{ $pesanan->user->name }}</p>
+            <p><strong>Order Code:</strong> {{ $pesanan->order_id }}</p>
+            <p><strong>Date:</strong> {{ $pesanan->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}</p>
+            <p><strong>Address:</strong> {{ $pesanan->alamat }}</p>
             <p><strong>Status:</strong> {{ ucfirst(str_replace('_', ' ', $pesanan->status)) }}</p>
         </div>
 
-        {{-- Tabel Pesanan --}}
+        {{-- Order Table --}}
         <div class="overflow-x-auto">
             <table class="w-full table-auto border border-gray-300">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="border px-4 py-2 text-left">Menu</th>
-                        <th class="border px-4 py-2 text-center">Jumlah</th>
-                        <th class="border px-4 py-2 text-right">Harga Satuan</th>
+                        <th class="border px-4 py-2 text-center">Quantity</th>
+                        <th class="border px-4 py-2 text-right">Unit Price</th>
                         <th class="border px-4 py-2 text-right">Total</th>
                     </tr>
                 </thead>
@@ -49,10 +49,10 @@
             </table>
         </div>
 
-        {{-- Rating Bintang --}}
+        {{-- Rating Section --}}
         @if(in_array($pesanan->status, ['paid', 'being_delivered']))
             <div class="mt-8">
-                <h3 class="text-lg font-semibold mb-4">Beri Rating Menu</h3>
+                <h3 class="text-lg font-semibold mb-4">Rate the Menu</h3>
                 <form action="{{ route('pesanan.rating', $pesanan->id) }}" method="POST">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -71,12 +71,12 @@
                                 @endif
 
                                 <div class="font-bold text-gray-800 text-lg mb-1">{{ $item->menu->nama }}</div>
-                                <div class="text-sm text-gray-500 mb-3">Jumlah: x{{ $item->jumlah }}</div>
+                                <div class="text-sm text-gray-500 mb-3">Qty: x{{ $item->jumlah }}</div>
 
                                 @if($item->rating)
                                     <div class="text-yellow-500 font-semibold">{{ $item->rating }} / 5</div>
                                 @else
-                                    {{-- Komponen Bintang --}}
+                                    {{-- Star Rating Component --}}
                                     <div 
                                         x-data="{ rating: 0, hoverRating: 0 }" 
                                         class="flex space-x-1 justify-center"
@@ -107,16 +107,16 @@
 
                     <div class="mt-6">
                         <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-                            Kirim Rating
+                            Submit Rating
                         </button>
                     </div>
                 </form>
             </div>
 
-            {{-- Download Struk --}}
+            {{-- Download Receipt --}}
             <a href="{{ route('pesanan.cetakStruk', $pesanan->id) }}" 
                 class="inline-block mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-                Download Struk
+                Download Receipt
             </a>
         @endif
 
