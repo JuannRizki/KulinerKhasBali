@@ -13,7 +13,8 @@ use App\Http\Controllers\{
     UserController,
     OrderController,
     CartController,
-    RekapController
+    RekapController,
+    AdminRatingController
 };
 
 // ==========================
@@ -78,7 +79,6 @@ Route::middleware(['auth'])->group(function () {
     // 🍽️ Menu (untuk user)
     Route::get('/user/menus', [MenuController::class, 'userIndex'])->name('user.menu.index');
     Route::get('/menus', [MenuController::class, 'userIndex'])->name('user.menus.index');
-    // 🔍 Pencarian Menu
     Route::get('/menu/search', [MenuController::class, 'userIndex'])->name('menu.search');
 
     // ==========================
@@ -88,8 +88,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/contacts', [KontakController::class, 'lihatPesan'])->name('contacts');
         Route::delete('/contacts/{id}', [KontakController::class, 'hapusPesan'])->name('hapusPesan');
+        Route::put('/contacts/{id}/reply', [KontakController::class, 'balasPesan'])->name('balasPesan');
+
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');
         Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
@@ -100,16 +103,19 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/orders/{order}/mark-paid', [OrderController::class, 'markAsPaid'])->name('orders.markPaid');
         Route::put('/orders/{order}/deliver', [OrderController::class, 'kirim'])->name('orders.deliver');
         Route::put('/orders/{order}/mark-delivered', [OrderController::class, 'markAsDelivered'])->name('orders.markDelivered');
+
         Route::get('/menus', [MenuController::class, 'index'])->name('menu.index');
         Route::get('/menus/create', [MenuController::class, 'create'])->name('menu.create');
         Route::post('/menus', [MenuController::class, 'store'])->name('menu.store');
         Route::get('/menus/{menu}/edit', [MenuController::class, 'edit'])->name('menu.edit');
         Route::put('/menus/{menu}', [MenuController::class, 'update'])->name('menu.update');
         Route::delete('/menus/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
-        Route::get('/rekap-penjualan', [RekapController::class, 'index'])->name('rekap.index');
-        Route::put('/contacts/{id}/reply', [KontakController::class, 'balasPesan'])->name('balasPesan');
-        
 
+        Route::get('/rekap-penjualan', [RekapController::class, 'index'])->name('rekap.index');
+
+        // 📊 Data Rating
+        Route::get('/ratings', [AdminRatingController::class, 'index'])->name('ratings.index');
+        
     });
 });
 
@@ -118,21 +124,13 @@ Route::middleware(['auth'])->group(function () {
 // ==========================
 Route::post('/midtrans/callback', [PesananController::class, 'callback']);
 
-// Auth Laravel Breeze / Fortify
 require __DIR__.'/auth.php';
 
 // Alias agar route('menu.index') tetap bisa dipakai di luar admin
 Route::get('/admin-menus', [MenuController::class, 'index'])->name('menu.index');
-// Alias agar route('menu.create') tetap bisa dipakai di luar admin
 Route::get('/admin-menus/create', [MenuController::class, 'create'])->name('menu.create');
-// Alias agar route('menu.edit') tetap bisa dipakai di luar admin
 Route::get('/admin-menus/{menu}/edit', [MenuController::class, 'edit'])->name('menu.edit');
-// Alias agar route('menu.destroy') tetap bisa dipakai di luar admin
 Route::delete('/admin-menus/{menu}', [MenuController::class, 'destroy'])->name('menu.destroy');
-
-// Alias agar route('admin.menu.create') tetap bisa dipakai
 Route::get('/admin-menus/create', [MenuController::class, 'create'])->name('admin.menu.create');
-// Alias agar route('admin.menu.edit') tetap bisa dipakai
 Route::get('/admin-menus/{menu}/edit', [MenuController::class, 'edit'])->name('admin.menu.edit');
-// Alias agar route('admin.menu.destroy') tetap bisa dipakai
 Route::delete('/admin-menus/{menu}', [MenuController::class, 'destroy'])->name('admin.menu.destroy');
