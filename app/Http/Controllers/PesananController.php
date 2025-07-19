@@ -53,7 +53,7 @@ class PesananController extends Controller
 
         $cart = Cart::with('menu')->where('user_id', auth()->id())->get();
         if ($cart->isEmpty()) {
-            return back()->with('error', 'Keranjang kamu kosong.');
+            return back()->with('error', 'Your basket is empty.');
         }
 
         DB::beginTransaction();
@@ -139,7 +139,7 @@ class PesananController extends Controller
 
         if ($signatureKey !== $request->signature_key) {
             Log::error('Signature key tidak valid.');
-            return response()->json(['message' => 'Signature tidak valid'], 403);
+            return response()->json(['message' => 'Invalid signature'], 403);
         }
 
         $parts = explode('-', $request->order_id);
@@ -148,7 +148,7 @@ class PesananController extends Controller
 
         if (!$pesanan) {
             Log::error("Pesanan dengan ID $id tidak ditemukan.");
-            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+            return response()->json(['message' => 'Order not found'], 404);
         }
 
         $status = $request->transaction_status;
@@ -164,7 +164,7 @@ class PesananController extends Controller
             $pesanan->update(['status' => 'canceled']);
         }
 
-        return response()->json(['message' => 'Callback diproses']);
+        return response()->json(['message' => 'Callback processed']);
     }
 
     public function batal($id)
@@ -180,9 +180,9 @@ class PesananController extends Controller
             }
             $pesanan->pesananItems()->delete();
             $pesanan->delete();
-            return redirect()->route('pesanan.index')->with('success', 'Pesanan dibatalkan.');
+            return redirect()->route('pesanan.index')->with('success', 'Order cancelled.');
         }
-        return redirect()->route('pesanan.index')->with('error', 'Pesanan sudah dibayar atau sedang dikirim, tidak bisa dibatalkan.');
+        return redirect()->route('pesanan.index')->with('error', 'Orders have been paid or are being shipped, they cannot be cancelled.');
     }
 
     public function cetakStruk($id)
@@ -214,7 +214,7 @@ class PesananController extends Controller
         $pesanan = Pesanan::where('user_id', auth()->id())->findOrFail($id);
 
         if (!in_array($pesanan->status, ['paid', 'being_delivered'])) {
-            return back()->with('error', 'Hanya pesanan yang sudah dibayar atau sedang dikirim yang bisa diberi rating.');
+            return back()->with('error', 'Only orders that have been paid for or are being shipped can be rated.');
         }
 
         foreach ($request->ratings as $itemId => $rating) {
@@ -228,7 +228,7 @@ class PesananController extends Controller
             }
         }
 
-        return back()->with('success', 'Rating berhasil dikirim.');
+        return back()->with('success', 'Rating successfully sent.');
     }
 
     public function markPaid($id)
@@ -240,7 +240,7 @@ class PesananController extends Controller
         $pesanan->refresh();
         return response()->json([
             'success' => true,
-            'message' => 'Pesanan berhasil ditandai sebagai sudah dibayar.',
+            'message' => 'Order successfully marked as paid.',
             'status' => $pesanan->status,
             'status_pembayaran' => $pesanan->status_pembayaran
         ]);
