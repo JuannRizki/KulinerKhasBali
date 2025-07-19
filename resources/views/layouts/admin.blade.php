@@ -14,7 +14,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Favicon (optional) -->
+  <!-- Favicon -->
   <link rel="icon" href="{{ asset('favicon.ico') }}">
 </head>
 
@@ -30,7 +30,7 @@
         </button>
       </div>
 
-      <!-- Profile (optional) -->
+      <!-- Profile -->
       <div class="flex flex-col items-center py-6 border-b border-gray-200">
         <div class="w-16 h-16 bg-indigo-500 text-white rounded-full flex items-center justify-center text-2xl">
           <i class="fas fa-user"></i>
@@ -74,6 +74,12 @@
           <i class="fas fa-chart-line w-6 text-center text-indigo-600"></i>
           <span x-show="sidebarOpen" class="ml-3">Sales Recap</span>
         </a>
+
+        <!-- ✅ Tambahan Menu Ratings -->
+        <a href="{{ route('admin.ratings.index') }}" class="flex items-center p-3 rounded hover:bg-indigo-50 transition">
+          <i class="fas fa-star w-6 text-center text-indigo-600"></i>
+          <span x-show="sidebarOpen" class="ml-3">Ratings</span>
+        </a>
       </nav>
     </aside>
 
@@ -83,8 +89,6 @@
       <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
         <h1 class="text-lg font-bold text-gray-800">@yield('page-title', 'Admin')</h1>
         <div class="flex items-center gap-4">
-         
-
           <!-- Logout -->
           <form action="{{ route('logout') }}" method="POST">
             @csrf
