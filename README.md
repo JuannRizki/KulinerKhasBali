@@ -213,3 +213,7 @@ module.exports = {
 
 ## 📄 License
 Proyek ini dibangun dengan Laravel
+
+## Link Vieo
+Vidio Demo : https://youtu.be/hdlCUPxFJWQ?si=bmv3_BbnGHQSbUL7
+Vidio Presentasi:  https://youtu.be/pJ2ZUtEM5A4
